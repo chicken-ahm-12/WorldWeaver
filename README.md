@@ -2,7 +2,7 @@
 
 A powerful terrain generation tool that lets you generate terrain procedurally. It provides you with an extensive set of settings that allows you to generate the type of terrian you want, with the type of biomes you want, with the items you want, similar to how minecraft works.
 
-## Getting Started
+# Getting Started
 
 ### Create a script
 First create a script and make variables linking to the Modules Settings and Generator:
