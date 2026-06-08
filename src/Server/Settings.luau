@@ -13,8 +13,8 @@ Settings.GridDIV = 3000 -- This much blocks (3000 * 3000) will have their data l
 
 Settings.VoxelSize = 4 -- Size of a single block
 
-Settings.MapWidth = 200 -- The actual Width (X) of the map (multiply this by your voxel size) to get the actual length
-Settings.MapBreadth = 200 -- The Actual  Breadth (Y) of the map (multiply this by your voxel size) to get the actual length
+Settings.MapWidth = 600 -- The actual Width (X) of the map (multiply this by your voxel size) to get the actual length
+Settings.MapBreadth = 600 -- The Actual  Breadth (Y) of the map (multiply this by your voxel size) to get the actual length
 Settings.Scale = 200 -- How smooth the terrain should be, lower values result in sharp changes, higher in smoother
 
 Settings.RenderThreadCap = 1 -- How many Divisions of Map to Render at Once (1 for best performance)
@@ -47,6 +47,41 @@ Settings.CaveFreq = 4 -- Self Exp
 -- 5
 -- If you add more Noise Details (in noise map) make sure to add its name to Noise Names as well
 -- It will automatically implement in terrain
+
+Settings.Biomes = {
+	"Plains",
+	"Mountains",
+	"Desert",
+	"Ice"
+}
+
+Settings.BiomeRanges = {
+	[Settings.Biomes[1]] = { -- Plains
+		Cont = NumberRange.new(0, 0.5),
+		Temp = NumberRange.new(-0.1, 0.3),
+		Ero = NumberRange.new(0.6, 1),
+		PV = NumberRange.new(-0.7, -0.3)
+	},
+	[Settings.Biomes[2]] = { -- Mountains
+		Cont = NumberRange.new(-1, -0.5),
+		Temp = NumberRange.new(-0.6, -0.2),
+		Ero = NumberRange.new(0.2, 0.4),
+		PV = NumberRange.new(0.7, 1)
+	},
+	[Settings.Biomes[3]] = { -- Deserts
+		Cont = NumberRange.new(-0.3, 0.1),
+		Temp = NumberRange.new(0.7,1),
+		Ero = NumberRange.new(0.6, 1),
+		PV = NumberRange.new(-0.7, -0.3)
+	},
+	[Settings.Biomes[4]] = { -- Ice
+		Cont = NumberRange.new(0, 0.6),
+		Temp = NumberRange.new(-1, -0.75),
+		Ero = NumberRange.new(-0.2, 0.4),
+		PV = NumberRange.new(-0.7, -0.1)
+	}
+}
+
 Settings.NoiseNames = {
 	Cont = "Continentalness",
 	Peak = "PV",
