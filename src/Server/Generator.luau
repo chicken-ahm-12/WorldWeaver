@@ -279,8 +279,9 @@ Generator.genereateGRID_Division = function(terrainSettings, startW, endW, start
 					local noise_Y = Generator.generateHeight(terrainSettings, x,z,noiseCharacteristics.freq)
 					Generator.heightGrid[x][z][v] = noise_Y
 					totalNoise += noise_Y
-					noise_Y *= (noiseCharacteristics.amp * (terrainSettings.Persistance^(count-1))) 
-					c_Y += noise_Y
+					
+					c_Y += terrainSettings:GetInterpolatedAmpValue(noise_Y, v)
+					
 					
 				end
 
