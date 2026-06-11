@@ -62,7 +62,7 @@ Settings.BiomeDetails = {
         Temp = NumberRange.new(0.3, 1),
         Ero  = NumberRange.new(0, 1),
         PV   = NumberRange.new(0.5, 1),
-        amp  = 2.2,
+        amp  = 4,
         Color = Color3.new(0.321569, 0.25098, 0.070588)
     },
     [Settings.Biomes[3]] = { -- Desert

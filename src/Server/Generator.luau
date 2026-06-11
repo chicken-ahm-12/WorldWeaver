@@ -189,9 +189,9 @@ Generator.generateDivision = function(terrainSettings, startW, endW, startB, end
 				elseif heightDifference > terrainSettings.VoxelSize then
 					-- Extend this part to fill the gap
 
-					local t_parts = heightDifference_/terrainSettings.VoxelSize
+					local t_parts = math.ceil(heightDifference/terrainSettings.VoxelSize)
 
-					local partY = (currentHeight + maxNeighborHeight) / 2
+					local partY = currentHeight
 
 					local new_Height
 
@@ -201,7 +201,7 @@ Generator.generateDivision = function(terrainSettings, startW, endW, startB, end
 					end
 
 					for i  = 0, t_parts, 1 do
-						new_Height = partY + (terrainSettings.VoxelSize*(i-2))
+						new_Height = partY + (terrainSettings.VoxelSize*(i))
 
 						part = Generator.createPart(terrainSettings, x,0,z, i)
 						part.Color = color
@@ -358,7 +358,9 @@ Generator.genereateGRID_Division = function(terrainSettings, startW, endW, start
 					
 				else
 					local c_Y = cell["RawHeight"] * terrainSettings.BiomeDetails[cell["Biome"]].amp
-					cell["TotalHeight"] = math.round(c_Y / terrainSettings.VoxelSize) * terrainSettings.VoxelSize
+					c_Y = math.floor(c_Y / terrainSettings.VoxelSize) * terrainSettings.VoxelSize
+					c_Y -= c_Y%terrainSettings.VoxelSize
+					cell["TotalHeight"] = c_Y
 				end
 			end
 
