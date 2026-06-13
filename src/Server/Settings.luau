@@ -1,18 +1,25 @@
+local TweenService = game:GetService("TweenService")
 local Settings = {}
 
 Settings.__index = Settings
 
 Settings.TerrainFolder = workspace.Debris
 
-Settings.CaveDisabledMapDIV = 300
+Settings.CaveDisabledMapDIV = 600
 Settings.CaveEnabledMapDIV = 70
 Settings.YAxisDIV = 30
 Settings.GridDIV = 3000
 Settings.VoxelSize = 4
+Settings.useInBuiltTerrain = false
+Settings.implementBiomeScoring = true
+Settings.vector3Size = Vector3.new(Settings.VoxelSize, Settings.VoxelSize, Settings.VoxelSize)
 
-Settings.MapWidth = 300
-Settings.MapBreadth = 300
+Settings.MapWidth = 600
+Settings.MapBreadth = 600
 Settings.Scale = 200
+
+Settings.smoothify = false
+Settings.smoothifyScale = Settings.Scale * Settings.VoxelSize
 
 Settings.RenderThreadCap = 1
 Settings.YAXISThreadCap = 1
@@ -21,8 +28,14 @@ Settings.GridCAP = 2
 Settings.startX = -100
 Settings.startZ = -100
 
+Settings.blendOn = true
 Settings.blendThresh = 10
 Settings.blendColorThresh = 4
+
+Settings.fallOff = false
+Settings.fallFactor = 0.5 -- How early do you want to fall off? lower = closer to edge
+Settings.fallThresh = 50
+Settings.fallDist = math.abs(Vector2.new(Settings.MapWidth/2, Settings.MapBreadth/2).Magnitude - Settings.fallThresh)
 
 Settings.Seed = 2
 Settings.zero_thresh = 0.01
@@ -36,7 +49,7 @@ Settings.caves_Enabled = false
 
 Settings.breathingTime = 0.0000001
 
-Settings.BedRock = -100
+Settings.BedRock = -200
 Settings.AirThresh = 0.15
 Settings.CaveFreq = 4
 
@@ -55,15 +68,17 @@ Settings.BiomeDetails = {
         Ero  = NumberRange.new(0, 1),
         PV   = NumberRange.new(0, 0.5),
         amp  = 1.7,
-        Color = Color3.new(0.066667, 0.67451, 0.12549)
+        Color = Color3.new(0.066667, 0.67451, 0.12549),
+        Material = Enum.Material.Grass
     },
     [Settings.Biomes[2]] = { -- Mountains,
 		Cont = NumberRange.new(0, 0.5),
         Temp = NumberRange.new(0.3, 1),
         Ero  = NumberRange.new(0, 1),
         PV   = NumberRange.new(0.5, 1),
-        amp  = 4,
-        Color = Color3.new(0.321569, 0.25098, 0.070588)
+        amp  = 3,
+        Color = Color3.new(0.321569, 0.25098, 0.070588),
+        Material = Enum.Material.Rock
     },
     [Settings.Biomes[3]] = { -- Desert
         Cont = NumberRange.new(0.5, 1),
@@ -71,7 +86,8 @@ Settings.BiomeDetails = {
         Ero  = NumberRange.new(0, 0.5),
         PV   = NumberRange.new(0, 0.4),
         amp  = 1.0,
-        Color = Color3.new(0.866667, 0.85098, 0.121569)
+        Color = Color3.new(0.866667, 0.85098, 0.121569),
+        Material = Enum.Material.Sand
     },
     [Settings.Biomes[4]] = { -- Ice
         Cont = NumberRange.new(0.5, 1),
@@ -79,7 +95,8 @@ Settings.BiomeDetails = {
         Ero  = NumberRange.new(0, 1),
         PV   = NumberRange.new(0, 0.5),
         amp  = 0.8,
-        Color = Color3.new(0.054902, 1, 0.905882)
+        Color = Color3.new(0.054902, 1, 0.905882),
+        Material = Enum.Material.Ice
     },
     [Settings.Biomes[5]] = { -- Savanna
         Cont = NumberRange.new(0.5, 1),
@@ -87,7 +104,9 @@ Settings.BiomeDetails = {
         Ero  = NumberRange.new(0.5, 1),
         PV   = NumberRange.new(0, 0.4),
         amp  = 1.3,
-        Color = Color3.new(0.784314, 0.627451, 0.12549)
+        Color = Color3.new(0.784314, 0.627451, 0.12549),
+        Material = Enum.Material.Sandstone
+
     },
     [Settings.Biomes[6]] = { -- Tundra
         Cont = NumberRange.new(0.5, 1),
@@ -95,7 +114,9 @@ Settings.BiomeDetails = {
         Ero  = NumberRange.new(0, 1),
         PV   = NumberRange.new(0, 0.5),
         amp  = 1.1,
-        Color = Color3.new(0.431373, 0.658824, 0.784314)
+        Color = Color3.new(0.431373, 0.658824, 0.784314),
+        Material = Enum.Material.Glacier
+
     }
 }
 
@@ -142,17 +163,17 @@ Settings.NoiseDetails = {
 
 Settings.InterpolationValues = {
     [Settings.NoiseNames.Cont] = {
-        [0] = 0, [0.05] = 0, [0.125] = 5, [0.2] = 8,
+        [0] = 0, [0.05] = 5, [0.125] = 5, [0.2] = 10,
         [0.25] = 15, [0.3] = 20, [0.375] = 22, [0.425] = 26,
-        [0.5] = 5, [0.55] = 10, [0.625] = 15, [0.675] = 22,
-        [0.725] = 28, [0.75] = 32, [0.85] = 50, [0.925] = 55,
-        [0.975] = 64, [1] = 64
+        [0.5] = 5, [0.55] = 10, [0.625] = 15, [0.675] = 28,
+        [0.725] = 28, [0.75] = 52, [0.85] = 80, [0.925] = 80,
+        [0.975] = 120, [1] = 150
     },
     [Settings.NoiseNames.Peak] = {
-        [0] = -30, [0.05] = -22, [0.125] = -18, [0.2] = -12,
-        [0.25] = -9, [0.3] = -6, [0.375] = -3, [0.425] = -1,
-        [0.5] = 0, [0.65] = 22, [0.725] = 40, [0.75] = 60,
-        [0.85] = 62, [0.925] = 78, [0.975] = 99, [1] = 110
+        [0] = 5, [0.05] = 10, [0.125] = 10, [0.2] = 150,
+        [0.25] = 25, [0.3] = 25, [0.375] = 55, [0.425] = 88,
+        [0.5] = 110, [0.65] = 110, [0.725] = 140, [0.75] = 170,
+        [0.85] = 200, [0.925] = 200, [0.975] = 250, [1] = 290
     },
     [Settings.NoiseNames.Eros] = {
         [0] = 5, [0.05] = 3, [0.125] = 3, [0.2] = 2,
@@ -161,10 +182,10 @@ Settings.InterpolationValues = {
         [0.85] = -16, [0.925] = -16, [0.975] = -19, [1] = -22
     },
     [Settings.NoiseNames.Temp] = {
-        [0] = 43, [0.05] = 38, [0.125] = 25, [0.2] = 25,
-        [0.25] = 18, [0.3] = 18, [0.375] = 12, [0.425] = 8,
-        [0.5] = 22, [0.65] = 20, [0.725] = 15, [0.75] = 22,
-        [0.85] = -14, [0.925] = -18, [0.975] = -18, [1] = -18
+        [0] = 80, [0.05] = 68, [0.125] = 55, [0.2] = 55,
+        [0.25] = 32, [0.3] = 27, [0.375] = 27, [0.425] = 20,
+        [0.5] = 10, [0.65] = 10, [0.725] = 2, [0.75] = -10,
+        [0.85] = -20, [0.925] = -20, [0.975] = -33, [1] = -45
     },
     [Settings.NoiseNames.Hum] = {
         [0] = -31, [0.125] = -27, [0.2] = -22, [0.25] = -18,
@@ -177,6 +198,14 @@ Settings.InterpolationValues = {
 Settings.new = function()
 	local self = setmetatable({}, Settings)
 	return self
+end
+
+function Settings:fallOffFunction(x)
+    -- Ease out for now, you can change it however you like
+    --return 1- ((6*math.pow(x, 5)) - (15*math.pow(x, 4)) + (10*math.pow(x, 3)))
+    return math.exp(-Settings.fallFactor * x)
+
+   
 end
 
 function Settings:GetInterpolatedAmpValue(val, noiseName)

@@ -58,6 +58,8 @@ Generator.setAttributes = function(terrainSettings, part, array, dens)
 	end
 	part:SetAttribute("Density", dens)
 	part:SetAttribute("Biome", array.Biome)
+	part.Color = array.Color
+	part.Material = terrainSettings.BiomeDetails[array.Biome].Material
 end
 
 Generator.createChunk = function(terrainSettings, x,y,z)
@@ -94,14 +96,22 @@ end
 
 
 Generator.generateHeight = function(terrainSettings, x,z,f)
-	local n = math.noise((x/terrainSettings.Scale)* f, (z/terrainSettings.Scale) * f, terrainSettings.Seed)
+	local scale = terrainSettings.Scale
+	if terrainSettings.smoothify then
+		scale = terrainSettings.smoothifyScale
+	end
+	local n = math.noise((x/scale)* f, (z/scale) * f, terrainSettings.Seed)
 	n = math.clamp(n,-0.5, 0.5)
 	n += 0.5
 	return n -- -1, 2 (0.00000004) * 45 = 11.22112
 end
 
 Generator.generateDensity = function(terrainSettings, x,y,z)
-	local n = math.noise((x/terrainSettings.Scale) * terrainSettings.CaveFreq, (y/terrainSettings.Scale) * terrainSettings.CaveFreq, (z/terrainSettings.Scale) * terrainSettings.CaveFreq)
+	local scale = terrainSettings.Scale
+	if terrainSettings.smoothify then
+		scale = terrainSettings.smoothifyScale
+	end
+	local n = math.noise((x/scale) * terrainSettings.CaveFreq, (y/scale) * terrainSettings.CaveFreq, (z/scale) * terrainSettings.CaveFreq)
 	n = math.clamp(n,-0.5, 0.5)
 	n += 0.5
 	return n
@@ -109,9 +119,7 @@ end
 
 Generator.generateDivision = function(terrainSettings, startW, endW, startB, endB)
 	Generator.threadsRunning += 1
-	local blendRadius = terrainSettings.blendThresh
-	local blendColorGrid
-	local blendColor
+
 	task.spawn(function()
 		for x = startW, endW do
 			for z = startB, endB do
@@ -122,26 +130,14 @@ Generator.generateDivision = function(terrainSettings, startW, endW, startB, end
 				local L_h
 				local part
 				local currArr = Generator.heightGrid[x][z]
-				local maxXGrid = math.min(endW, x+blendRadius)
-				local maxZGrid = math.min(endB, z+blendRadius)
-			
-
-				if Generator.heightGrid[maxXGrid] and Generator.heightGrid[maxXGrid][z] then
-					blendColorGrid = Generator.heightGrid[maxXGrid][z]
-					if currArr.Biome ~= blendColorGrid.Biome then
-						blendColor = blendColorGrid.Color
-					else
-						blendColor = nil
-					end
-				end
 				
-
 				if Generator.heightGrid[x][z].TotalHeight == nil then
 					print("Nil at X: "..x..", Z: "..z.."\n")
 					continue	
 				end
 
 				local color = Generator.blendColorSimple(terrainSettings, x, z, startW, endW, startB, endB)
+				currArr.Color = color
 				local currentHeight = Generator.heightGrid[x][z].TotalHeight
 				local maxNeighborHeight = currentHeight
 				local minNeighbotHeight = currentHeight
@@ -167,23 +163,41 @@ Generator.generateDivision = function(terrainSettings, startW, endW, startB, end
 					minNeighbotHeight = math.max(minNeighbotHeight, R_h)
 				end
 
+				local currX = x
+				local currZ = z 
+
+				if not terrainSettings.smoothify then
+					currX *= terrainSettings.VoxelSize
+					currZ *= terrainSettings.VoxelSize
+				end
 
 				local heightDifference_ = (maxNeighborHeight - currentHeight)
 				local heightDifference = math.abs(heightDifference_)
 
+
 				if heightDifference == 0 then
-					part = Generator.createPart(terrainSettings, x,0,z)
 					local new_Height = currentHeight 
-					part.Color = color
-					part.CFrame = CFrame.new(
+					
+					if terrainSettings.useInBuiltTerrain then
+						workspace.Terrain:FillBlock(CFrame.new(
 						Vector3.new(
-							x * terrainSettings.VoxelSize, 
+							currX, 
 							new_Height, 
-							z * terrainSettings.VoxelSize
+							currZ
+							)
+						), terrainSettings.vector3Size, terrainSettings.BiomeDetails[currArr.Biome].Material)
+					else
+						part = Generator.createPart(terrainSettings, x,0,z)
+						part.CFrame = CFrame.new(
+						Vector3.new(
+							currX, 
+							new_Height, 
+							currZ
+							)
 						)
-					)
-					Generator.setAttributes(terrainSettings, part, Generator.heightGrid[x][z], Generator.heightGrid[x][z].Density)
-					part.Parent = n_chunk
+						Generator.setAttributes(terrainSettings, part, Generator.heightGrid[x][z], Generator.heightGrid[x][z].Density)
+						part.Parent = n_chunk
+					end
 
 
 				elseif heightDifference > terrainSettings.VoxelSize then
@@ -200,48 +214,76 @@ Generator.generateDivision = function(terrainSettings, startW, endW, startB, end
 						partY -= (terrainSettings.VoxelSize/2)
 					end
 
-					for i  = 0, t_parts, 1 do
+					for i  = 0, t_parts-1, 1 do
 						new_Height = partY + (terrainSettings.VoxelSize*(i))
 
-						part = Generator.createPart(terrainSettings, x,0,z, i)
-						part.Color = color
-						part.CFrame = CFrame.new(
-							Vector3.new(x * terrainSettings.VoxelSize, new_Height, z * terrainSettings.VoxelSize)
-						)
-						part.Parent = n_chunk
-						Generator.setAttributes(terrainSettings, part, Generator.heightGrid[x][z], Generator.heightGrid[x][z].Density)
+						if terrainSettings.useInBuiltTerrain then
+							workspace.Terrain:FillBlock(CFrame.new(
+								Vector3.new(
+								currX, 
+								new_Height, 
+								currZ
+								)
+							), terrainSettings.vector3Size, terrainSettings.BiomeDetails[currArr.Biome].Material)
+						else
+							part = Generator.createPart(terrainSettings, x,0,z, i)
+							part.CFrame = CFrame.new(
+							Vector3.new(
+								currX, 
+								new_Height, 
+								currZ
+								)
+							)
+							Generator.setAttributes(terrainSettings, part, Generator.heightGrid[x][z], Generator.heightGrid[x][z].Density)
+							part.Parent = n_chunk
+						end
 					end
 
 				else
 					--Normal part for small height differences
-
-					part = Generator.createPart(terrainSettings, x,0,z)
+					
 					local new_Height = currentHeight 
-					part.Color = color
-					part.CFrame = CFrame.new(
+					if terrainSettings.useInBuiltTerrain then
+						workspace.Terrain:FillBlock(CFrame.new(
+							Vector3.new(
+									currX, 
+									new_Height, 
+									currZ
+								)
+						), terrainSettings.vector3Size, terrainSettings.BiomeDetails[currArr.Biome].Material)
+						
+						workspace.Terrain:FillBlock(CFrame.new(
+							Vector3.new(
+								currX, 
+								new_Height, 
+								currZ
+								)
+						), terrainSettings.vector3Size, terrainSettings.BiomeDetails[currArr.Biome].Material)
+					else
+						part = Generator.createPart(terrainSettings, x,0,z)
+						part.CFrame = CFrame.new(
 						Vector3.new(
-							x * terrainSettings.VoxelSize, 
-							new_Height, 
-							z * terrainSettings.VoxelSize
+								currX, 
+								new_Height, 
+								currZ
+								)
 						)
-					)
-					Generator.setAttributes(terrainSettings, part, Generator.heightGrid[x][z], Generator.heightGrid[x][z].Density)
-					part.Parent = n_chunk
+						Generator.setAttributes(terrainSettings, part, Generator.heightGrid[x][z], Generator.heightGrid[x][z].Density)
+						part.Parent = n_chunk
 
-
-					new_Height = currentHeight + terrainSettings.VoxelSize
-					part = Generator.createPart(terrainSettings,x,0,z, 1)
-					part.Color = color
-					part.CFrame = CFrame.new(
-						Vector3.new(
-							x * terrainSettings.VoxelSize, 
-							new_Height, 
-							z * terrainSettings.VoxelSize
+						new_Height = currentHeight + terrainSettings.VoxelSize
+						part = Generator.createPart(terrainSettings,x,0,z, 1)
+						part.CFrame = CFrame.new(
+							Vector3.new(
+								currX, 
+								new_Height, 
+								currZ
+								)
 						)
-					)
 
-					Generator.setAttributes(terrainSettings, part, Generator.heightGrid[x][z], Generator.heightGrid[x][z].Density)
-					part.Parent = n_chunk
+						Generator.setAttributes(terrainSettings, part, Generator.heightGrid[x][z], Generator.heightGrid[x][z].Density)
+						part.Parent = n_chunk
+					end
 
 				end
 
@@ -259,13 +301,21 @@ end
 
 Generator.genereateGRID_Division = function(terrainSettings, startW, endW, startB, endB)
 	task.spawn(function()
+		local center = Vector2.new(terrainSettings.startX + (terrainSettings.MapWidth/2), terrainSettings.startZ +( terrainSettings.MapBreadth/2))
+		local startVec2 = Vector2.new(terrainSettings.startX, terrainSettings.startZ)
+		local maxDistCenter = (center-startVec2).Magnitude
 		for x = startW, endW do
 			if Generator.heightGrid[x] == nil then
 				Generator.heightGrid[x] = {}
 			end
 			for z = startB, endB do
 
+				local currVec2 = Vector2.new(x,z)
+				local currDistFromCenter = (currVec2-center).Magnitude
+				local currDistInv = currDistFromCenter/maxDistCenter
+				local fallOffValue = terrainSettings:fallOffFunction(currDistInv)
 				local c_Y = 0
+				local c_Y_ =0 
 				local totalNoise = 0
 
 				if Generator.heightGrid[x][z] == nil then
@@ -278,95 +328,120 @@ Generator.genereateGRID_Division = function(terrainSettings, startW, endW, start
 					local noiseCharacteristics = terrainSettings.NoiseDetails[v]
 					local noise_Y = Generator.generateHeight(terrainSettings, x,z,noiseCharacteristics.freq)
 					Generator.heightGrid[x][z][v] = noise_Y
+
+					
 					totalNoise += noise_Y
 					
 					c_Y += terrainSettings:GetInterpolatedAmpValue(noise_Y, v)
 					
+					c_Y_ += noise_Y * noiseCharacteristics.amp
+
+					
 					
 				end
 
-				
+				if terrainSettings.fallOff  then
+						c_Y *= fallOffValue
+						c_Y_ *= fallOffValue
+				end
 				local density_p = Generator.generateDensity(terrainSettings, x, c_Y, z)
 				local norm = Generator.generateHeight(terrainSettings, x, z, 1)
 				Generator.heightGrid[x][z]["TotalNoise"] = totalNoise
 				Generator.heightGrid[x][z]["Density"] = density_p
 				Generator.heightGrid[x][z]["NormalNoise"] = norm
-				Generator.heightGrid[x][z]["Biome"] = Painting.SetBiome(Generator.heightGrid[x][z], terrainSettings)
+				Generator.heightGrid[x][z]["Biome"], score = Painting.SetBiome(Generator.heightGrid[x][z], terrainSettings)
 				
+				if terrainSettings.implementBiomeScoring then
+					c_Y *= score
+					c_Y_ *= score
+				end
 
-				
-				c_Y = math.floor(c_Y/terrainSettings.VoxelSize)
-				c_Y-= c_Y%terrainSettings.VoxelSize
+
+				if not terrainSettings.smoothify then
+					c_Y = math.floor(c_Y/terrainSettings.VoxelSize)
+					c_Y-= c_Y%terrainSettings.VoxelSize
+					c_Y_ = math.floor(c_Y_/terrainSettings.VoxelSize)
+					c_Y_-= c_Y_%terrainSettings.VoxelSize 
+				end
 				Generator.heightGrid[x][z]["RawHeight"] = c_Y
+				Generator.heightGrid[x][z]["TotalHeight"] = c_Y_
 				Generator.heightGrid[x][z]["Color"] = terrainSettings.BiomeDetails[Generator.heightGrid[x][z]["Biome"]].Color
 			end
 			if (x%(terrainSettings.VoxelSize * 50) == 0) then
 				task.wait()
 			end
 		end
-		local blendRadius = terrainSettings.blendThresh
-		for x = startW, endW do
-			local gridX = Generator.heightGrid[x]
-			
-			for z = startB, endB do
-				if not gridX or not gridX[z] then continue end
+		
+		if terrainSettings.blendOn then
+			local blendRadius = terrainSettings.blendThresh
+			for x = startW, endW do
+				local gridX = Generator.heightGrid[x]
+				
+				for z = startB, endB do
+					if not gridX or not gridX[z] then continue end
 
-				local xMin = math.max(startW, x - blendRadius)
-				local xMax = math.min(endW, x + blendRadius)
-				local zMin = math.max(startB, z - blendRadius)
-				local zMax = math.min(endB, z + blendRadius)
+					local xMin = math.max(startW, x - blendRadius)
+					local xMax = math.min(endW, x + blendRadius)
+					local zMin = math.max(startB, z - blendRadius)
+					local zMax = math.min(endB, z + blendRadius)
 
-				local totalWeight = 0
-				local blendedAmp = 0
-				local r, g, b = 0, 0, 0
+					local totalWeight = 0
+					local blendedAmp = 0
+					local r, g, b = 0, 0, 0
 
-				for nx = xMin, xMax do
-					local gridNX = Generator.heightGrid[nx]
-					if not gridNX then continue end
-					local dx = nx - x
-					local dxSq = dx * dx
+					for nx = xMin, xMax do
+						local gridNX = Generator.heightGrid[nx]
+						if not gridNX then continue end
+						local dx = nx - x
+						local dxSq = dx * dx
 
-					for nz = zMin, zMax do
-						local neighbor = gridNX[nz]
-						if not neighbor then continue end
+						for nz = zMin, zMax do
+							local neighbor = gridNX[nz]
+							if not neighbor then continue end
 
-						local neighborBiome = neighbor["Biome"]
-						if not neighborBiome or neighborBiome == "" then continue end
+							local neighborBiome = neighbor["Biome"]
+							if not neighborBiome or neighborBiome == "" then continue end
 
-						-- Use inverse squared distance — no sqrt needed
-						local distSq = dxSq + (nz - z) * (nz - z)
-						local w = 1 / (distSq + 0.5)
+							-- Use inverse squared distance — no sqrt needed
+							local distSq = dxSq + (nz - z) * (nz - z)
+							local w = 1 / (distSq + 0.5)
 
-						local details = terrainSettings.BiomeDetails[neighborBiome]
-						blendedAmp += details.amp * w
+							local details = terrainSettings.BiomeDetails[neighborBiome]
+							blendedAmp += details.amp * w
 
-						local col = details.Color
-						r += col.R * w
-						g += col.G * w
-						b += col.B * w
+							local col = details.Color
+							r += col.R * w
+							g += col.G * w
+							b += col.B * w
 
-						totalWeight += w
+							totalWeight += w
+						end
+					end
+
+					local cell = gridX[z]
+
+					if totalWeight > 0 then
+						local invTotal = 1 / totalWeight
+						local c_Y = cell["RawHeight"] * (blendedAmp * invTotal)
+						if not terrainSettings.smoothify then
+							c_Y = math.round(c_Y / terrainSettings.VoxelSize) * terrainSettings.VoxelSize
+						end 
+						cell["TotalHeight"] = c_Y
+						
+					else
+						local c_Y = cell["RawHeight"] * terrainSettings.BiomeDetails[cell["Biome"]].amp
+						if not terrainSettings.smoothify then
+							c_Y = math.floor(c_Y / terrainSettings.VoxelSize) * terrainSettings.VoxelSize
+							c_Y -= c_Y%terrainSettings.VoxelSize
+						end
+
+						cell["TotalHeight"] = c_Y
 					end
 				end
 
-				local cell = gridX[z]
-
-				if totalWeight > 0 then
-					local invTotal = 1 / totalWeight
-					local c_Y = cell["RawHeight"] * (blendedAmp * invTotal)
-					c_Y = math.round(c_Y / terrainSettings.VoxelSize) * terrainSettings.VoxelSize
-					cell["TotalHeight"] = c_Y
-					
-				else
-					local c_Y = cell["RawHeight"] * terrainSettings.BiomeDetails[cell["Biome"]].amp
-					c_Y = math.floor(c_Y / terrainSettings.VoxelSize) * terrainSettings.VoxelSize
-					c_Y -= c_Y%terrainSettings.VoxelSize
-					cell["TotalHeight"] = c_Y
+				if (x % (terrainSettings.VoxelSize * 10) == 0) then
+					task.wait()
 				end
-			end
-
-			if (x % (terrainSettings.VoxelSize * 20) == 0) then
-				task.wait()
 			end
 		end
 

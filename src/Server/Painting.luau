@@ -2,6 +2,7 @@ local Painting = {}
 
 Painting.SetBiome = function(arr, terrainSettings)
 	local bestscore = math.huge
+	local bestScoreInv = math.huge
 	local currBiome 
 	for i, v in pairs(terrainSettings.Biomes) do
 		local checkCont, contPen = terrainSettings:ValueInRange(terrainSettings.BiomeDetails[v].Cont, arr.Continentalness or 0)
@@ -14,8 +15,8 @@ Painting.SetBiome = function(arr, terrainSettings)
 			currBiome = v
 		end
 	end
-
-	return currBiome
+	bestScoreInv = (4 - bestscore)/4
+	return currBiome, bestScoreInv
 end
 
 
