@@ -74,3 +74,8 @@ In any case a size of 600 by 600 or 800 by 800 is a very big map in of itself
 so you don't need to worry about that in first place.
 
 
+# Snapshots
+
+![Generated_Terrain](image.png)
+
+
