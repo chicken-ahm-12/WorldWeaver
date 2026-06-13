@@ -6,7 +6,6 @@ Settings.__index = Settings
 Settings.TerrainFolder = workspace.Debris
 
 Settings.CaveDisabledMapDIV = 600
-Settings.CaveEnabledMapDIV = 70
 Settings.YAxisDIV = 30
 Settings.GridDIV = 3000
 Settings.VoxelSize = 4
@@ -243,10 +242,6 @@ function Settings:GetPartAttributes(part)
 	local Humidity = part:GetAttribute(noises.Hum)
 	local Density = part:GetAttribute(Settings.DensityNoise)
 	return Continentalness, PV, Erosion, Temperature, Humidity, Density
-end
-
-function Settings:cubicBezier(p0, p1, p2, p3, t)
-	return (1 - t)^3 * p0 + 3 * (1 - t)^2 * t * p1 + 3 * (1 - t) * t^2 * p2 + t^3 * p3
 end
 
 return Settings
