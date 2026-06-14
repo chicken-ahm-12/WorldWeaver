@@ -7,7 +7,7 @@ Settings.TerrainFolder = workspace.Debris
 
 Settings.CaveDisabledMapDIV = 600
 Settings.YAxisDIV = 30
-Settings.GridDIV = 3000
+Settings.GridDIV = 600
 Settings.VoxelSize = 4
 Settings.useInBuiltTerrain = false
 Settings.implementBiomeScoring = true
@@ -15,7 +15,7 @@ Settings.vector3Size = Vector3.new(Settings.VoxelSize, Settings.VoxelSize, Setti
 
 Settings.MapWidth = 300
 Settings.MapBreadth = 300
-Settings.Scale = 300
+Settings.Scale = 500
 
 Settings.smoothify = false
 Settings.smoothifyScale = Settings.Scale * Settings.VoxelSize
@@ -28,12 +28,14 @@ Settings.startX = -100
 Settings.startZ = -100
 
 Settings.blendOn = true
-Settings.blendThresh = 10
+Settings.fastBlend = true
+Settings.blendThresh = 5
+Settings.fastBlendThresh = 4
 Settings.blendColorThresh = 4
 
 Settings.fallOff = false
-Settings.fallFactor = 0.5 -- How early do you want to fall off? lower = closer to edge
-Settings.fallThresh = 50
+Settings.fallFactor = 1 -- How early do you want to fall off? lower = closer to edge
+Settings.fallThresh = 40
 Settings.fallDist = math.abs(Vector2.new(Settings.MapWidth/2, Settings.MapBreadth/2).Magnitude - Settings.fallThresh)
 
 Settings.Seed = 2
@@ -165,14 +167,14 @@ Settings.InterpolationValues = {
         [0] = 0, [0.05] = 5, [0.125] = 5, [0.2] = 10,
         [0.25] = 15, [0.3] = 20, [0.375] = 22, [0.425] = 26,
         [0.5] = 5, [0.55] = 10, [0.625] = 15, [0.675] = 28,
-        [0.725] = 28, [0.75] = 52, [0.85] = 80, [0.925] = 80,
-        [0.975] = 120, [1] = 150
+        [0.725] = 52, [0.75] = 52, [0.85] = 52, [0.925] = 70,
+        [0.975] = 92, [1] = 108
     },
     [Settings.NoiseNames.Peak] = {
-        [0] = 5, [0.05] = 10, [0.125] = 10, [0.2] = 150,
+        [0] = 5, [0.05] = 10, [0.125] = 10, [0.2] = 15,
         [0.25] = 25, [0.3] = 25, [0.375] = 55, [0.425] = 88,
-        [0.5] = 110, [0.65] = 110, [0.725] = 140, [0.75] = 170,
-        [0.85] = 200, [0.925] = 200, [0.975] = 250, [0.985] = 275 ,[1] = 290
+        [0.5] = 110, [0.65] = 110, [0.725] = 110, [0.75] = 140,
+        [0.85] = 160, [0.925] = 160, [0.975] = 160, [1] = 200
     },
     [Settings.NoiseNames.Eros] = {
         [0] = 5, [0.05] = 3, [0.125] = 3, [0.2] = 2,
