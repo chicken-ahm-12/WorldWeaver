@@ -13,9 +13,9 @@ Settings.useInBuiltTerrain = false
 Settings.implementBiomeScoring = true
 Settings.vector3Size = Vector3.new(Settings.VoxelSize, Settings.VoxelSize, Settings.VoxelSize)
 
-Settings.MapWidth = 600
-Settings.MapBreadth = 600
-Settings.Scale = 200
+Settings.MapWidth = 300
+Settings.MapBreadth = 300
+Settings.Scale = 300
 
 Settings.smoothify = false
 Settings.smoothifyScale = Settings.Scale * Settings.VoxelSize
@@ -172,7 +172,7 @@ Settings.InterpolationValues = {
         [0] = 5, [0.05] = 10, [0.125] = 10, [0.2] = 150,
         [0.25] = 25, [0.3] = 25, [0.375] = 55, [0.425] = 88,
         [0.5] = 110, [0.65] = 110, [0.725] = 140, [0.75] = 170,
-        [0.85] = 200, [0.925] = 200, [0.975] = 250, [1] = 290
+        [0.85] = 200, [0.925] = 200, [0.975] = 250, [0.985] = 275 ,[1] = 290
     },
     [Settings.NoiseNames.Eros] = {
         [0] = 5, [0.05] = 3, [0.125] = 3, [0.2] = 2,
