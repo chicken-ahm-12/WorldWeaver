@@ -76,6 +76,6 @@ so you don't need to worry about that in first place.
 
 # Snapshots
 
-![Generated_Terrain](image.png)
+![Generated_Terrain](snapshots\image.png)
 
 
