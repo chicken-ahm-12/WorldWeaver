@@ -20,13 +20,4 @@ Painting.SetBiome = function(arr, terrainSettings)
 end
 
 
-
-Painting.Paint = function(part, terrainSettings)
-	if terrainSettings.caves_Enabled then
-
-	else
-
-	end
-end
-
 return Painting
