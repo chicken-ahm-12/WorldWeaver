@@ -14,8 +14,8 @@ Settings.useInBuiltTerrain = false -- Determines whether to use in-built terrain
 Settings.implementBiomeScoring = true -- A way to variate the terrain, experiment with it and see what you like
 Settings.vector3Size = Vector3.new(Settings.VoxelSize, Settings.VoxelSize, Settings.VoxelSize) -- for convenience
 
-Settings.MapWidth = 1200 -- Size on X-axis
-Settings.MapBreadth = 1200 -- Size on Z-axis
+Settings.MapWidth = 600 -- Size on X-axis
+Settings.MapBreadth = 600 -- Size on Z-axis
                            -- the blocks simulate terrain by changing on Y-Axis 
 
 Settings.Scale = 500 -- Higher value means a more smooth and gradual change in terrain (and Biomes)
