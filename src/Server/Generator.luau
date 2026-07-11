@@ -7,7 +7,6 @@ Generator.YThreadsRunning = 0
 Generator.threadsCompleted =0
 Generator.heightGrid = {}
 
--- Simple 4-neighbor color blend, no radius loop
 function Generator.blendColorSimple(terrainSettings, x, z, startW, endW, startB, endB)
     local heightGrid = Generator.heightGrid
     local biomeDetails = terrainSettings.BiomeDetails
@@ -94,7 +93,6 @@ Generator.getChunk = function(terrainSettings, x,y,z)
 	return  newChunk
 end
 
-
 Generator.generateHeight = function(terrainSettings, x,z,f)
 	local scale = terrainSettings.Scale
 	if terrainSettings.smoothify then
@@ -103,7 +101,7 @@ Generator.generateHeight = function(terrainSettings, x,z,f)
 	local n = math.noise((x/scale)* f, (z/scale) * f, terrainSettings.Seed)
 	n = math.clamp(n,-0.5, 0.5)
 	n += 0.5
-	return n -- -1, 2 (0.00000004) * 45 = 11.22112
+	return n 
 end
 
 Generator.generateDensity = function(terrainSettings, x,y,z)
@@ -201,7 +199,6 @@ Generator.generateDivision = function(terrainSettings, startW, endW, startB, end
 
 
 				elseif heightDifference > terrainSettings.VoxelSize then
-					-- Extend this part to fill the gap
 
 					local t_parts = math.ceil(heightDifference/terrainSettings.VoxelSize)
 
@@ -240,7 +237,7 @@ Generator.generateDivision = function(terrainSettings, startW, endW, startB, end
 					end
 
 				else
-					--Normal part for small height differences
+					
 					
 					local new_Height = currentHeight 
 					if terrainSettings.useInBuiltTerrain then
@@ -320,7 +317,6 @@ Generator.genereateGRID_Division = function(terrainSettings, startW, endW, start
 			return math.floor(v * invVoxel) * voxelSize
 		end
 
-		-- ─── Pass 1: Generate height grid ───────────────────────────────────────
 		for x = startW, endW do
 			if not heightGrid[x] then heightGrid[x] = {} end
 			local gridX = heightGrid[x]
@@ -574,7 +570,7 @@ Generator.generateTerrain = function(terrainSettings )
 				end
 
 				if Generator.threadsRunning >= terrainSettings.GridCAP then
-					--print("Threads: ", Generator.threadsRunning)
+					
 					repeat task.wait() until Generator.threadsRunning == 0
 					v-=1
 				else
@@ -592,7 +588,6 @@ Generator.generateTerrain = function(terrainSettings )
 		end
 	end
 	
-	--print("Threads: ", Generator.threadsRunning)
 	repeat task.wait(terrainSettings.breathingTime) until Generator.threadsRunning == 0
 	print("================== GRID INITIALIZED! ==================\n")
 	
@@ -657,8 +652,6 @@ Generator.generateTerrain = function(terrainSettings )
 
 		end
 	end
-
-		
 	
 	repeat print("Running Division/Total Divisions : "..(div_no).."/"..totalDiv); task.wait() until Generator.threadsRunning == 0
 	
