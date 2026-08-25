@@ -47,6 +47,7 @@ Settings.blendColorThresh = 4 -- self-explanatory. Works a bit differently so ex
 Settings.fallOff = false -- Determines whether the terrain falls off at the end
 Settings.fallOffStart = 0.35  -- no falloff inside this distance (0–1)
 Settings.fallOffEnd   = 1.0   -- fully suppressed at this distance
+
 Settings.Seed = 2 -- Seed, changing this will change the terrain of map too whenever you generate it.
 Settings.zero_thresh = 0.01 -- Donot touch
 
