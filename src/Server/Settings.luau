@@ -4,7 +4,7 @@ Settings.__index = Settings -- Don't touch this
 
 Settings.TerrainFolder = workspace.Debris -- you can change this to wherever you want to store the whole generated terrain
 
-Settings.CaveDisabledMapDIV = 600 -- The division by which the map will be generated 1 by 1 (600 by 600)
+Settings.CaveDisabledMapDIV = 500 -- The division by which the map will be generated 1 by 1 (600 by 600)
                                   -- NOTE: MAP SIZES SHOULD BE A MULTIPLE OF THIS
 
 Settings.GridDIV = 600 -- The division by which the grid will be generated 1 by 1 (here 600 by 600)
@@ -14,8 +14,8 @@ Settings.useInBuiltTerrain = false -- Determines whether to use in-built terrain
 Settings.implementBiomeScoring = true -- A way to variate the terrain, experiment with it and see what you like
 Settings.vector3Size = Vector3.new(Settings.VoxelSize, Settings.VoxelSize, Settings.VoxelSize) -- for convenience
 
-Settings.MapWidth = 600 -- Size on X-axis
-Settings.MapBreadth = 600 -- Size on Z-axis
+Settings.MapWidth = 500 -- Size on X-axis
+Settings.MapBreadth = 500 -- Size on Z-axis
                            -- the blocks simulate terrain by changing on Y-Axis 
 
 Settings.Scale = 500 -- Higher value means a more smooth and gradual change in terrain (and Biomes)
@@ -30,6 +30,13 @@ Settings.GridCAP = 2
 Settings.startX = -100 -- Position X where your map will start
 Settings.startZ = -100 -- Position Z where your map will start
                        -- NOTE: This is the top left Corner of your map. (StartX, StartZ)
+Settings.Center = Vector2.new( -- Center of the world
+			Settings.startX + Settings.MapWidth / 2,
+			Settings.startZ + Settings.MapBreadth / 2
+		)
+
+Settings.Boundary = Vector2.new(Settings.startX + Settings.MapWidth / 2, Settings.startZ) -- boundary of the world
+Settings.maxDistanceFromCenter =  (Settings.Boundary - Settings.Center).Magnitude
 
 Settings.blendOn = true -- Whether you want to blend terrain (allows biomes to retain their unique terrain characteristics)
 Settings.fastBlend = false -- a faster way of blending. Experiment whether you like it or not
@@ -38,10 +45,8 @@ Settings.fastBlendThresh = 4 -- higher means more time to load
 Settings.blendColorThresh = 4 -- self-explanatory. Works a bit differently so experiment with it.
 
 Settings.fallOff = false -- Determines whether the terrain falls off at the end
-Settings.fallFactor = 1 -- How early do you want to fall off? lower = closer to edge (according to the default function)
-Settings.fallThresh = 40 -- how far from the edge do you want the terrain to START falling off.
-Settings.fallDist = math.abs(Vector2.new(Settings.MapWidth/2, Settings.MapBreadth/2).Magnitude - Settings.fallThresh) -- Donot touch
-
+Settings.fallOffStart = 0.35  -- no falloff inside this distance (0–1)
+Settings.fallOffEnd   = 1.0   -- fully suppressed at this distance
 Settings.Seed = 2 -- Seed, changing this will change the terrain of map too whenever you generate it.
 Settings.zero_thresh = 0.01 -- Donot touch
 
@@ -90,7 +95,7 @@ Settings.BiomeDetails = {
         Temp = NumberRange.new(0.3, 1),
         Ero  = NumberRange.new(0, 1),
         PV   = NumberRange.new(0.5, 1),
-        amp  = 2.8,
+        amp  = 2.3,
         Color = Color3.new(0.321569, 0.25098, 0.070588),
         Material = Enum.Material.Rock
     },
@@ -235,14 +240,21 @@ end
 
 function Settings:fallOffFunction(x)
     
-    -- Mathematical function that returns the fall off value (0-1)
-    return math.exp(-Settings.fallFactor * x)
+    local s = self.fallOffStart
+    local e = self.fallOffEnd
 
+    if x <= s then return 1 end
+    if x >= e then return 0 end
+
+    local n = (x - s) / (e - s)
+
+
+    return 1 - (n * n * (3 - 2 * n))
    
 end
 
 function Settings:GetInterpolatedAmpValue(val, noiseName) -- dont touch
-	local interpolVals = Settings.InterpolationValues[noiseName]
+	local interpolVals = self.InterpolationValues[noiseName]
 
 	for i, v in pairs(interpolVals) do
 		if val <= i then
@@ -268,7 +280,7 @@ function Settings:ValueInRange(Range, num) -- dont touch
 end
 
 function Settings:GetPartAttributes(part) 
-	local noises = Settings.NoiseNames
+	local noises = self.NoiseNames
 	local Continentalness = part:GetAttribute(noises.Cont)
 	local PV = part:GetAttribute(noises.Peak)
 	local Erosion = part:GetAttribute(noises.Eros)
