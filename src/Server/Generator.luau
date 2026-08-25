@@ -1,3 +1,12 @@
+--[[
+Copyright 2026 WorldWeaver by chicken-ahm-12
+
+Github: chicken-ahm-12
+
+Licensed under the Apache License, Version 2.0 (the "License");
+you may not use this file except in compliance with the License.
+]]
+
 local Painting = require(script.Parent.Painting)
 
 local Generator = {}
