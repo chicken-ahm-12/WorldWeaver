@@ -464,11 +464,6 @@ Generator.genereateGRID_Division = function(terrainSettings, startW, endW, start
 						local blendedAmp = 0
 						local r, g, b = 0, 0, 0
 
-						local currVec2 = Vector2.new(x,z)
-						local currDistFromCenter = (currVec2-center).Magnitude
-						local currDistInv = currDistFromCenter/maxDistCenter
-						local fallOffValue = terrainSettings:fallOffFunction(currDistInv)
-
 						for nx = xMin, xMax do
 							local gridNX = Generator.heightGrid[nx]
 							if not gridNX then continue end
