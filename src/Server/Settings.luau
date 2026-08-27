@@ -62,7 +62,7 @@ Settings.Boundary = Vector2.new(Settings.startX + Settings.MapWidth / 2, Setting
 Settings.maxDistanceFromCenter =  (Settings.Boundary - Settings.Center).Magnitude
 
 Settings.blendOn = true -- Whether you want to blend terrain (allows biomes to retain their unique terrain characteristics)
-Settings.fastBlend = false -- a faster way of blending. Experiment whether you like it or not
+Settings.fastBlend = true -- a faster way of blending. Experiment whether you like it or not
 Settings.blendThresh = 10 -- higher means more time to load, donot go past 10 or 15
 Settings.fastBlendThresh = 4 -- higher means more time to load
 Settings.blendColorThresh = 4 -- self-explanatory. Works a bit differently so experiment with it.
