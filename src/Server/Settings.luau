@@ -13,43 +13,58 @@ Settings.__index = Settings -- Don't touch this
 
 Settings.TerrainFolder = workspace.Debris -- you can change this to wherever you want to store the whole generated terrain
 
+Settings.Scale = 500 -- Higher value means a more smooth and gradual change in terrain (and Biomes)
+Settings.Seed = 2 -- Seed, changing this will change the terrain of map too whenever you generate it.
+Settings.zero_thresh = 0.01 -- Donot touch
+Settings.ChunkSize = 16 -- Increasing this will increase Chunk Size
+
+Settings.Lacunarity = 2 
+Settings.Persistance = 0.5 -- Higher value means more ragged/spiky terrain
+                           -- Lower value means more flat and smoother terrain
+
+Settings.startX = -100 -- Position X where your map will start
+Settings.startZ = -100 -- Position Z where your map will start
+                       -- NOTE: This is the top left Corner of your map. (StartX, StartZ)
+
+Settings.MapWidth = 1000 -- Size on X-axis
+Settings.MapBreadth = 1000 -- Size on Z-axis
+                           -- the blocks simulate terrain by changing on Y-Axis 
+
+Settings.Center = Vector2.new( -- Center of the world
+			Settings.startX + Settings.MapWidth / 2,
+			Settings.startZ + Settings.MapBreadth / 2
+		)
+
+Settings.breathingTime = 0.0000001 -- Don't touch
+
 Settings.CaveDisabledMapDIV = 500 -- The division by which the map will be generated 1 by 1 (600 by 600)
                                   -- NOTE: MAP SIZES SHOULD BE A MULTIPLE OF THIS
 
 Settings.GridDIV = 600 -- The division by which the grid will be generated 1 by 1 (here 600 by 600)
                        -- NOTE: Either keep this same as MapDIV or keep it so the sizes are a multiple of this and the MAP_DIV
 Settings.VoxelSize = 4 -- Size of your block (if you increase this, naturally the map will increase in size too)
-Settings.useInBuiltTerrain = false -- Determines whether to use in-built terrain generater of roblox
-Settings.implementBiomeScoring = true -- A way to variate the terrain, experiment with it and see what you like
+Settings.useInBuiltTerrain = true -- Determines whether to use in-built terrain generater of roblox
+                                   -- You can increase the size that roblox can handle at a moment using this
+                                   -- but see if you like the look
+Settings.implementBiomeScoring = false -- A way to variate the terrain, experiment with it and see what you like
 Settings.vector3Size = Vector3.new(Settings.VoxelSize, Settings.VoxelSize, Settings.VoxelSize) -- for convenience
+Settings.smoothify = true -- Determines whether the terrain should be blocky (like minecraft) or smooth. 
+Settings.smoothifyScale = Settings.Scale * 2 -- you can set a different scale aswell
+Settings.smoothificationFactor = Settings.VoxelSize - 0.001
+Settings.smoothificationSize = Settings.vector3Size + Vector3.new(Settings.smoothificationFactor,Settings.smoothificationFactor,Settings.smoothificationFactor)
 
-Settings.MapWidth = 500 -- Size on X-axis
-Settings.MapBreadth = 500 -- Size on Z-axis
-                           -- the blocks simulate terrain by changing on Y-Axis 
-
-Settings.Scale = 500 -- Higher value means a more smooth and gradual change in terrain (and Biomes)
-
-Settings.smoothify = false -- Determines whether the terrain should be blocky (like minecraft) or smooth. 
-                           -- Cooler if false :)
-Settings.smoothifyScale = Settings.Scale * Settings.VoxelSize -- smoothification naturally reduces map size so it has a different scale
+Settings.sharperBiomes = true -- Just means biome boundaries will look more defined even when blend is on
+Settings.sharpnessBiomeDefactor = 1 -- Higher means less sharp boundary betweenbiomes
 
 Settings.RenderThreadCap = 1
 Settings.GridCAP = 2 
-
-Settings.startX = -100 -- Position X where your map will start
-Settings.startZ = -100 -- Position Z where your map will start
-                       -- NOTE: This is the top left Corner of your map. (StartX, StartZ)
-Settings.Center = Vector2.new( -- Center of the world
-			Settings.startX + Settings.MapWidth / 2,
-			Settings.startZ + Settings.MapBreadth / 2
-		)
 
 Settings.Boundary = Vector2.new(Settings.startX + Settings.MapWidth / 2, Settings.startZ) -- boundary of the world
 Settings.maxDistanceFromCenter =  (Settings.Boundary - Settings.Center).Magnitude
 
 Settings.blendOn = true -- Whether you want to blend terrain (allows biomes to retain their unique terrain characteristics)
 Settings.fastBlend = false -- a faster way of blending. Experiment whether you like it or not
-Settings.blendThresh = 5 -- higher means more time to load, donot go past 10 or 15
+Settings.blendThresh = 10 -- higher means more time to load, donot go past 10 or 15
 Settings.fastBlendThresh = 4 -- higher means more time to load
 Settings.blendColorThresh = 4 -- self-explanatory. Works a bit differently so experiment with it.
 
@@ -57,18 +72,7 @@ Settings.fallOff = false -- Determines whether the terrain falls off at the end
 Settings.fallOffStart = 0.35  -- no falloff inside this distance (0–1)
 Settings.fallOffEnd   = 1.0   -- fully suppressed at this distance
 
-Settings.Seed = 2 -- Seed, changing this will change the terrain of map too whenever you generate it.
-Settings.zero_thresh = 0.01 -- Donot touch
-
-Settings.ChunkSize = 16 -- Increasing this will increase Chunk Size
-
-Settings.Lacunarity = 2 
-Settings.Persistance = 0.5 -- Change and experiment with it
-
-Settings.breathingTime = 0.0000001 -- Don't touch
-
 Settings.BedRock = -200 -- Not in use yet
-Settings.AirThresh = 0.15 -- Not in use yet
 Settings.CaveFreq = 4 
 
 --/////////////////////// STEPS TO ADD BIOME DATA [2 Steps] //////////////////////
@@ -79,8 +83,6 @@ Settings.Biomes = {
     "Mountains", -- 2
     "Desert", -- 3
     "Ice", -- 4
-    "Savanna", -- 5
-    "Tundra" -- 6
 }
 
 -- Step 2: Reference it in Details by
@@ -105,7 +107,7 @@ Settings.BiomeDetails = {
         Temp = NumberRange.new(0.3, 1),
         Ero  = NumberRange.new(0, 1),
         PV   = NumberRange.new(0.5, 1),
-        amp  = 2.3,
+        amp  = 3.7,
         Color = Color3.new(0.321569, 0.25098, 0.070588),
         Material = Enum.Material.Rock
     },
@@ -126,26 +128,6 @@ Settings.BiomeDetails = {
         amp  = 0.8,
         Color = Color3.new(0.054902, 1, 0.905882),
         Material = Enum.Material.Ice
-    },
-    [Settings.Biomes[5]] = { -- Savanna
-        Cont = NumberRange.new(0.5, 1),
-        Temp = NumberRange.new(0.5, 1),
-        Ero  = NumberRange.new(0.5, 1),
-        PV   = NumberRange.new(0, 0.4),
-        amp  = 1.3,
-        Color = Color3.new(0.784314, 0.627451, 0.12549),
-        Material = Enum.Material.Sandstone
-
-    },
-    [Settings.Biomes[6]] = { -- Tundra
-        Cont = NumberRange.new(0.5, 1),
-        Temp = NumberRange.new(0.3, 0.5),
-        Ero  = NumberRange.new(0, 1),
-        PV   = NumberRange.new(0, 0.5),
-        amp  = 1.1,
-        Color = Color3.new(0.431373, 0.658824, 0.784314),
-        Material = Enum.Material.Glacier
-
     }
 }
 
@@ -182,21 +164,21 @@ Settings.NoiseDetails = {
 	
 	},
 	[Settings.NoiseNames.Peak] = {
-		amp = 500,
+		amp = 250,
 		freq = 4,
 	
 	},
 	[Settings.NoiseNames.Eros] = {
-		amp = -10,
+		amp = -Settings.VoxelSize,
 		freq = 16,
 	
 	},
 	[Settings.NoiseNames.Temp] = {
-		amp = 250,
+		amp = 20,
 		freq = 8
 	},
 	[Settings.NoiseNames.Hum] = {
-		amp = 1,
+		amp = 0,
 		freq = 32
 	}
 }
@@ -212,34 +194,34 @@ Settings.NoiseDetails = {
 Settings.InterpolationValues = {
     [Settings.NoiseNames.Cont] = { -- range of values with certain heights for continentalness
         [0] = 0, [0.05] = 5, [0.125] = 5, [0.2] = 10,
-        [0.25] = 15, [0.3] = 20, [0.375] = 22, [0.425] = 26,
-        [0.5] = 5, [0.55] = 10, [0.625] = 15, [0.675] = 28,
-        [0.725] = 52, [0.75] = 52, [0.85] = 52, [0.925] = 70,
-        [0.975] = 92, [1] = 108
+        [0.25] = 15, [0.3] = 20, [0.375] = 20, [0.425] = 20,
+        [0.5] = 5, [0.55] = 10, [0.625] = 10, [0.675] = 28,
+        [0.725] = 32, [0.75] = 32, [0.85] = 46, [0.925] = 55,
+        [0.975] = 68, [1] = 68
     },
     [Settings.NoiseNames.Peak] = {
-        [0] = 5, [0.05] = 10, [0.125] = 10, [0.2] = 15,
-        [0.25] = 25, [0.3] = 25, [0.375] = 55, [0.425] = 88,
-        [0.5] = 110, [0.65] = 110, [0.725] = 110, [0.75] = 140,
-        [0.85] = 160, [0.925] = 160, [0.975] = 160, [1] = 200
+        [0] = 50, [0.05] = 68, [0.125] = 68, [0.2] = 77,
+        [0.25] = 82, [0.3] = 96, [0.375] = 105, [0.425] = 105,
+        [0.5] = 130, [0.65] = 130, [0.725] = 130, [0.75] = 152,
+        [0.85] = 170, [0.925] = 180, [0.975] = 180, [1] = 194
     },
     [Settings.NoiseNames.Eros] = {
         [0] = 5, [0.05] = 3, [0.125] = 3, [0.2] = 2,
-        [0.25] = 2, [0.3] = 1, [0.375] = 1, [0.425] = 0,
-        [0.5] = 0, [0.65] = -3, [0.725] = -4, [0.75] = -8,
-        [0.85] = -16, [0.925] = -16, [0.975] = -19, [1] = -22
+        [0.25] = 2, [0.3] = 2, [0.375] = 0, [0.425] = 0,
+        [0.5] = 0, [0.65] = -3, [0.725] = -8, [0.75] = -8,
+        [0.85] = -16, [0.925] = -16, [0.975] = -16, [1] = -22
     },
     [Settings.NoiseNames.Temp] = {
         [0] = 80, [0.05] = 68, [0.125] = 55, [0.2] = 55,
-        [0.25] = 32, [0.3] = 27, [0.375] = 27, [0.425] = 20,
-        [0.5] = 10, [0.65] = 10, [0.725] = 2, [0.75] = -10,
-        [0.85] = -20, [0.925] = -20, [0.975] = -33, [1] = -45
+        [0.25] = 55, [0.3] = 37, [0.375] = 37, [0.425] = 37,
+        [0.5] = 22, [0.65] = 10, [0.725] = 10, [0.75] = -5,
+        [0.85] = -20, [0.925] = -20, [0.975] = -33, [1] = -33
     },
     [Settings.NoiseNames.Hum] = {
-        [0] = -31, [0.125] = -27, [0.2] = -22, [0.25] = -18,
-        [0.3] = -10, [0.375] = -10, [0.425] = -2, [0.5] = -12,
-        [0.65] = -2, [0.725] = 8, [0.75] = 12, [0.85] = 17,
-        [0.925] = 22, [0.975] = 28, [1] = 28
+        [0] = -31, [0.125] = -27, [0.2] = -27, [0.25] = -18,
+        [0.3] = -10, [0.375] = -10, [0.425] = -12, [0.5] = -12,
+        [0.65] = -12, [0.725] = 1, [0.75] = 8, [0.85] = 8,
+        [0.925] = 17, [0.975] = 28, [1] = 28
     }
 }
 
@@ -263,14 +245,33 @@ function Settings:fallOffFunction(x)
    
 end
 
-function Settings:GetInterpolatedAmpValue(val, noiseName) -- dont touch
-	local interpolVals = self.InterpolationValues[noiseName]
 
-	for i, v in pairs(interpolVals) do
-		if val <= i then
-			return v
-		end
-	end
+function Settings:BuildInterpolationCache()
+    self._interpCache = {}
+    for noiseName, tbl in pairs(self.InterpolationValues) do
+        local keys = {}
+        for k in pairs(tbl) do table.insert(keys, k) end
+        table.sort(keys)
+        self._interpCache[noiseName] = keys
+    end
+end
+
+function Settings:GetInterpolatedAmpValue(val, noiseName)
+    local interpolVals = self.InterpolationValues[noiseName]
+    local keys = self._interpCache[noiseName]
+
+    local prevKey, prevVal = nil, nil
+    for _, k in ipairs(keys) do
+        local v = interpolVals[k]
+        if val <= k then
+            if prevKey == nil then return v end
+            local t = (val - prevKey) / (k - prevKey)
+            return prevVal + (v - prevVal) * t
+        end
+        prevKey = k
+        prevVal = v
+    end
+    return prevVal
 end
 
 function Settings:ValueInRange(Range, num) -- dont touch
