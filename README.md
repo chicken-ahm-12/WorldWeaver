@@ -1,8 +1,16 @@
 # WorldWeaver
 
-A powerful terrain generation tool that lets you generate terrain procedurally. It provides you with an extensive set of settings that allows you to generate the type of terrian you want, with the type of biomes you want, with the items you want, similar to how minecraft works.
+A powerful roblox terrain generation tool that lets you generate terrain procedurally. It provides you with an extensive set of settings that allow you to generate the type of terrian you want, with the type of biomes you want, similar to how minecraft works.
 
 # Getting Started
+
+### Proper Paths
+Make sure the paths to modules are properly sourced. Especially the one sourcing the Painting module in Generator:
+
+```lua
+-- Generator.luau
+local Painting = require(script.Parent.Painting)
+```
 
 ### Create a script
 First create a script and make variables linking to the Modules Settings and Generator:
@@ -11,27 +19,41 @@ First create a script and make variables linking to the Modules Settings and Gen
 local Settings = require(path_to_settings_module)
 local Generator = require(path_to_generator_module)
 ```
+
 ### Create a settings object
 
 Initialize a Settings object by running:
 
 ```lua
 local new_Settings = Settings.new()
+
+-- Changes to these new settings (Interpolation Values to be specific)
+-- should be made here
+
+-- ///////
+new_Settings:BuildInterpolationCache() -- this is necessary for proper smooth terrain
 ```
 
 This ensures you can make different settings (such as different size, amplitudes, etc)
-for different chunks of terrain at different places in your map (if thats what you are going for)
+to your liking or if there different maps at different places within the server,
+those maps could each have their own settings.
 
 ### Generate Terrain
 
 ```lua
+local new_Settings = Settings.new()
+
+new_Settings:BuildInterpolationCache()
+
 Generator.generateTerrain(new_Settings)
 ```
 voila! run the script and watch your terrain generate realtime!
 
 # Best Practices
 
-### Size should equal
+### Size on all axis are better off equal
+
+Although this is not strictly necessary.
 
 There are size parameters that control the size of your terrain:
 ```lua
@@ -44,7 +66,6 @@ to make these values equal, that is:
 Settings.MapWidth = 300
 Settings.MapBreadth = 300
 ```
-their values should be same.
 
 ### Size should be a multiple of division
 This setting is what controls how much area (in this case 600 by 600) will be generated in a single moment:
@@ -73,9 +94,43 @@ ungenerates other (this might come in future updates)
 In any case a size of 600 by 600 or 800 by 800 is a very big map in of itself
 so you don't need to worry about that in first place.
 
+### Use Roblox's in built terrain generator for generating large maps
+
+If you want to make maps as large as 2000 by 2000 studs or More, you should use Roblox's
+in built terrain generator by setting:
+
+```lua
+Settings.useInBuiltTerrain = true
+```
+Though you would be better off setting fast blend to true as well for faster and efficient calculation of terrain:
+
+```lua
+Settings.fastBlend = true
+```
+
+### FastBlend or normal Blend?
+
+You can choose any, and see whose results you like the more. Normal blend blends more whereas
+fastblend gives more characteristics to biomes. Both look nice in their own way, so it is subjective.
+Although, if you are generating very large maps, going with fast blend is better.
 
 # Snapshots
 
-![Generated_Terrain](snapshots/image.png)
+## (Smoothify = false) + (useInBuiltTerrain = false)
+
+![Generated_Terrain](snapshots/Snap_1.png)
+![Generated_Terrain](snapshots/view.png)
+
+## (Smoothify = true) + (useInBuiltTerrain = false)
+
+![Generated_Terrain](snapshots/smooth_block.png)
+
+## (Smoothify = false) + (useInBuiltTerrain = true)
+
+![Generated_Terrain](snapshots/blocky_notSmooth.png)
+
+## (Smoothify = true) + (useInBuiltTerrain = true)
+
+![Generated_Terrain](snapshots/smooth.png)
 
 
