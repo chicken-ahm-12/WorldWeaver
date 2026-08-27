@@ -25,8 +25,8 @@ Settings.startX = -100 -- Position X where your map will start
 Settings.startZ = -100 -- Position Z where your map will start
                        -- NOTE: This is the top left Corner of your map. (StartX, StartZ)
 
-Settings.MapWidth = 1000 -- Size on X-axis
-Settings.MapBreadth = 1000 -- Size on Z-axis
+Settings.MapWidth = 500 -- Size on X-axis
+Settings.MapBreadth = 500 -- Size on Z-axis
                            -- the blocks simulate terrain by changing on Y-Axis 
 
 Settings.Center = Vector2.new( -- Center of the world
@@ -42,12 +42,12 @@ Settings.CaveDisabledMapDIV = 500 -- The division by which the map will be gener
 Settings.GridDIV = 600 -- The division by which the grid will be generated 1 by 1 (here 600 by 600)
                        -- NOTE: Either keep this same as MapDIV or keep it so the sizes are a multiple of this and the MAP_DIV
 Settings.VoxelSize = 4 -- Size of your block (if you increase this, naturally the map will increase in size too)
-Settings.useInBuiltTerrain = true -- Determines whether to use in-built terrain generater of roblox
+Settings.useInBuiltTerrain = false -- Determines whether to use in-built terrain generater of roblox
                                    -- You can increase the size that roblox can handle at a moment using this
                                    -- but see if you like the look
 Settings.implementBiomeScoring = false -- A way to variate the terrain, experiment with it and see what you like
 Settings.vector3Size = Vector3.new(Settings.VoxelSize, Settings.VoxelSize, Settings.VoxelSize) -- for convenience
-Settings.smoothify = true -- Determines whether the terrain should be blocky (like minecraft) or smooth. 
+Settings.smoothify = false -- Determines whether the terrain should be blocky (like minecraft) or smooth. 
 Settings.smoothifyScale = Settings.Scale * 2 -- you can set a different scale aswell
 Settings.smoothificationFactor = Settings.VoxelSize - 0.001
 Settings.smoothificationSize = Settings.vector3Size + Vector3.new(Settings.smoothificationFactor,Settings.smoothificationFactor,Settings.smoothificationFactor)
