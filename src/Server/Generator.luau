@@ -130,7 +130,12 @@ Generator.generateDivision = function(terrainSettings, startW, endW, startB, end
 	task.spawn(function()
 		for x = startW, endW do
 			for z = startB, endB do
-				local n_chunk = Generator.getChunk(terrainSettings, x,0,z)
+				local n_chunk
+
+				if not terrainSettings.useInBuiltTerrain then
+					n_chunk = Generator.getChunk(terrainSettings, x,0,z)
+				end
+
 				local B_h
 				local F_h
 				local R_h
@@ -174,10 +179,8 @@ Generator.generateDivision = function(terrainSettings, startW, endW, startB, end
 				local currX = x
 				local currZ = z 
 
-				if not terrainSettings.smoothify then
-					currX *= terrainSettings.VoxelSize
-					currZ *= terrainSettings.VoxelSize
-				end
+				currX *= terrainSettings.VoxelSize
+				currZ *= terrainSettings.VoxelSize
 
 				local heightDifference_ = (maxNeighborHeight - currentHeight)
 				local heightDifference = math.abs(heightDifference_)
@@ -193,7 +196,7 @@ Generator.generateDivision = function(terrainSettings, startW, endW, startB, end
 							new_Height, 
 							currZ
 							)
-						), terrainSettings.vector3Size, terrainSettings.BiomeDetails[currArr.Biome].Material)
+						), terrainSettings.smoothificationSize, terrainSettings.BiomeDetails[currArr.Biome].Material)
 					else
 						part = Generator.createPart(terrainSettings, x,0,z)
 						part.CFrame = CFrame.new(
@@ -209,15 +212,19 @@ Generator.generateDivision = function(terrainSettings, startW, endW, startB, end
 
 
 				elseif heightDifference > terrainSettings.VoxelSize then
-
 					local t_parts = math.ceil(heightDifference/terrainSettings.VoxelSize)
+					
+					
 
 					local partY = currentHeight
 
 					local new_Height
 
 					for i  = 0, t_parts-1, 1 do
+						
 						new_Height = partY + (terrainSettings.VoxelSize*(i))
+
+						
 
 						if terrainSettings.useInBuiltTerrain then
 							workspace.Terrain:FillBlock(CFrame.new(
@@ -226,7 +233,7 @@ Generator.generateDivision = function(terrainSettings, startW, endW, startB, end
 								new_Height, 
 								currZ
 								)
-							), terrainSettings.vector3Size, terrainSettings.BiomeDetails[currArr.Biome].Material)
+							), terrainSettings.smoothificationSize, terrainSettings.BiomeDetails[currArr.Biome].Material)
 						else
 							part = Generator.createPart(terrainSettings, x,0,z, i)
 							part.CFrame = CFrame.new(
@@ -251,16 +258,17 @@ Generator.generateDivision = function(terrainSettings, startW, endW, startB, end
 									new_Height, 
 									currZ
 								)
-						), terrainSettings.vector3Size, terrainSettings.BiomeDetails[currArr.Biome].Material)
+						), terrainSettings.smoothificationSize, terrainSettings.BiomeDetails[currArr.Biome].Material)
 						
 						new_Height = currentHeight + terrainSettings.VoxelSize
+
 						workspace.Terrain:FillBlock(CFrame.new(
 							Vector3.new(
 								currX, 
 								new_Height, 
 								currZ
 								)
-						), terrainSettings.vector3Size, terrainSettings.BiomeDetails[currArr.Biome].Material)
+						), terrainSettings.smoothificationSize, terrainSettings.BiomeDetails[currArr.Biome].Material)
 					else
 						part = Generator.createPart(terrainSettings, x,0,z)
 						part.CFrame = CFrame.new(
@@ -274,6 +282,7 @@ Generator.generateDivision = function(terrainSettings, startW, endW, startB, end
 						part.Parent = n_chunk
 
 						new_Height += terrainSettings.VoxelSize
+						
 						part = Generator.createPart(terrainSettings,x,0,z, 1)
 						part.CFrame = CFrame.new(
 							Vector3.new(
@@ -330,13 +339,17 @@ Generator.genereateGRID_Division = function(terrainSettings, startW, endW, start
 				local currDistInv = currDistFromCenter/maxDistCenter
 				local fallOffValue = terrainSettings:fallOffFunction(currDistInv)
 
+				local count = 1
 				for _, v in noiseNames do
 					local nc = noiseDetails[v]
 					local noise_Y = Generator.generateHeight(terrainSettings, x, z, nc.freq)
 					cell[v] = noise_Y
 					totalNoise += noise_Y
-					c_Y  += terrainSettings:GetInterpolatedAmpValue(noise_Y, v)
-					c_Y_ += noise_Y * nc.amp
+					
+					c_Y_ += noise_Y * nc.amp * (terrainSettings.Persistance^count)
+					c_Y  += (terrainSettings:GetInterpolatedAmpValue(noise_Y, v) * (terrainSettings.Persistance^count)) + c_Y_
+
+					count+=1
 				end
 
 				local density_p = Generator.generateDensity(terrainSettings, x, c_Y, z)
@@ -349,6 +362,10 @@ Generator.genereateGRID_Division = function(terrainSettings, startW, endW, start
 				local biome, score = Painting.SetBiome(cell, terrainSettings)
 				cell.Biome = biome
 
+				if terrainSettings.sharperBiome then
+					c_Y *= (biomeDetails[biome].amp/terrainSettings.sharpnessBiomeDefactor)
+					c_Y_ *= (biomeDetails[biome].amp/terrainSettings.sharpnessBiomeDefactor)
+				end
 				if terrainSettings.implementBiomeScoring then
 					c_Y  *= score
 					c_Y_ *= score
@@ -356,6 +373,12 @@ Generator.genereateGRID_Division = function(terrainSettings, startW, endW, start
 
 				if terrainSettings.fallOff  then
 					c_Y *= fallOffValue
+					c_Y_*= fallOffValue
+				end
+
+				if terrainSettings.smoothify then
+					c_Y_ = math.floor(c_Y / terrainSettings.VoxelSize) * terrainSettings.VoxelSize
+					c_Y_ -= c_Y_%terrainSettings.VoxelSize
 				end
 
 				cell.RawHeight = c_Y  
@@ -442,13 +465,7 @@ Generator.genereateGRID_Division = function(terrainSettings, startW, endW, start
 						end
 
 						if not terrainSettings.smoothify then
-							if c_Y < 0 then 
-								c_Y = math.ceil(c_Y / terrainSettings.VoxelSize) * terrainSettings.VoxelSize
-							else
-								c_Y = math.floor(c_Y / terrainSettings.VoxelSize) * terrainSettings.VoxelSize
-							
-							end
-							
+							c_Y = math.floor(c_Y / terrainSettings.VoxelSize) * terrainSettings.VoxelSize
 							c_Y -= c_Y%terrainSettings.VoxelSize
 						end
 
@@ -471,7 +488,7 @@ Generator.genereateGRID_Division = function(terrainSettings, startW, endW, start
 						local zMax = math.min(endB, z + blendRadius)
 						local totalWeight = 0
 						local blendedAmp = 0
-						local r, g, b = 0, 0, 0
+						
 
 						for nx = xMin, xMax do
 							local gridNX = Generator.heightGrid[nx]
@@ -495,11 +512,6 @@ Generator.genereateGRID_Division = function(terrainSettings, startW, endW, start
 								local details = terrainSettings.BiomeDetails[neighborBiome]
 								blendedAmp += details.amp * w
 
-								local col = details.Color
-								r += col.R * w
-								g += col.G * w
-								b += col.B * w
-
 								totalWeight += w
 							end
 						end
@@ -517,13 +529,7 @@ Generator.genereateGRID_Division = function(terrainSettings, startW, endW, start
 						end
 
 						if not terrainSettings.smoothify then
-							if c_Y < 0 then 
-								c_Y = math.ceil(c_Y / terrainSettings.VoxelSize) * terrainSettings.VoxelSize
-							else
-								c_Y = math.floor(c_Y / terrainSettings.VoxelSize) * terrainSettings.VoxelSize
-							
-							end
-							
+							c_Y = math.floor(c_Y / terrainSettings.VoxelSize) * terrainSettings.VoxelSize
 							c_Y -= c_Y%terrainSettings.VoxelSize
 						end
 						cell["TotalHeight"] = c_Y
@@ -541,8 +547,6 @@ Generator.genereateGRID_Division = function(terrainSettings, startW, endW, start
 end
 
 Generator.generateTerrain = function(terrainSettings )
-	
-	
 
 	local mapBreadthPer = math.ceil(terrainSettings.MapBreadth / terrainSettings.GridDIV)
 	local mapWidthPer = math.ceil(terrainSettings.MapWidth / terrainSettings.GridDIV)
@@ -590,16 +594,17 @@ Generator.generateTerrain = function(terrainSettings )
 					
 					repeat task.wait() until Generator.threadsRunning == 0
 					v-=1
+					
 				else
 					Generator.threadsRunning+=1
+					div_no+=1
 					Generator.genereateGRID_Division(terrainSettings, startW,endW, startB,endB)
-					
 					print("Running Division/Total Divisions : "..(div_no).."/"..totalDiv)
 					
 					
 				end
 				v+=1
-				div_no+=1
+				
 			end
 				
 		end
