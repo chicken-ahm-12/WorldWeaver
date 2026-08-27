@@ -18,7 +18,6 @@ Settings.Seed = 2 -- Seed, changing this will change the terrain of map too when
 Settings.zero_thresh = 0.01 -- Donot touch
 Settings.ChunkSize = 16 -- Increasing this will increase Chunk Size
 
-Settings.Lacunarity = 2 
 Settings.Persistance = 0.5 -- Higher value means more ragged/spiky terrain
                            -- Lower value means more flat and smoother terrain
 
