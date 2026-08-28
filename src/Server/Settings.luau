@@ -18,7 +18,7 @@ Settings.Seed = 2 -- Seed, changing this will change the terrain of map too when
 Settings.zero_thresh = 0.01 -- Donot touch
 Settings.ChunkSize = 16 -- Increasing this will increase Chunk Size
 
-Settings.Persistance = 0.5 -- Higher value means more ragged/spiky terrain
+Settings.Persistance = 0.45 -- Higher value means more ragged/spiky terrain
                            -- Lower value means more flat and smoother terrain
 
 Settings.startX = -100 -- Position X where your map will start
@@ -52,7 +52,7 @@ Settings.smoothifyScale = Settings.Scale * 2 -- you can set a different scale as
 Settings.smoothificationFactor = Settings.VoxelSize - 0.001
 Settings.smoothificationSize = Settings.vector3Size + Vector3.new(Settings.smoothificationFactor,Settings.smoothificationFactor,Settings.smoothificationFactor)
 
-Settings.sharperBiomes = false -- Just means biome boundaries will look more defined even when blend is on
+Settings.sharperBiomes = true -- Just means biome boundaries will look more defined even when blend is on
 Settings.sharpnessBiomeDefactor = 1 -- Higher means less sharp boundary betweenbiomes
 
 Settings.RenderThreadCap = 1
@@ -64,7 +64,7 @@ Settings.maxDistanceFromCenter =  (Settings.Boundary - Settings.Center).Magnitud
 Settings.blendOn = true -- Whether you want to blend terrain (allows biomes to retain their unique terrain characteristics)
 Settings.fastBlend = true -- a faster way of blending. Experiment whether you like it or not
 Settings.blendThresh = 10 -- higher means more time to load, donot go past 10 or 15
-Settings.fastBlendThresh = 15 -- higher means more time to load
+Settings.fastBlendThresh = 4 -- higher means more time to load
 Settings.blendColorThresh = 4 -- self-explanatory. Works a bit differently so experiment with it.
 
 Settings.fallOff = false -- Determines whether the terrain falls off at the end
@@ -106,7 +106,7 @@ Settings.BiomeDetails = {
         Temp = NumberRange.new(0.3, 1),
         Ero  = NumberRange.new(0, 1),
         PV   = NumberRange.new(0.5, 1),
-        amp  = 2.5,
+        amp  = 3.7,
         Color = Color3.new(0.321569, 0.25098, 0.070588),
         Material = Enum.Material.Rock
     },
@@ -152,16 +152,16 @@ Settings.DensityNoise = "Density"
 -- It is descending, meaning smaller integers (starting from 1) will have higher priority.
 Settings.NoiseNames = {
 	Cont = {"Continentalness",1}, -- Example naming scheme
-	Peak = {"PV",3},
-	Eros = {"Erosion",4},
-	Temp = {"Temperature",2},
-	Hum = {"Humidity",5}
+	Peak = {"PV",4},
+	Eros = {"Erosion",2},
+	Temp = {"Temperature",5},
+	Hum = {"Humidity",3}
 }
 
 -- Step 2: Reference these names in this table by their nickname and add their parameters.
 Settings.NoiseDetails = {
 	[Settings.NoiseNames.Cont[1]] = { -- Reference cont by its nickname [1] means the first value of the table Cont (its name)
-		amp = 3, -- Add all these parameters
+		amp = 4, -- Add all these parameters
 		freq = 2,
 	
 	},
@@ -253,7 +253,7 @@ function Settings:BuildCache()
     self._noiseCache = {}
 
     for nickname, props in pairs(self.NoiseNames) do
-        table.insert(self._noiseCache, props[2], nickname)
+        self._noiseCache[props[2]] = nickname
     end
 
     for noiseName, tbl in pairs(self.InterpolationValues) do
