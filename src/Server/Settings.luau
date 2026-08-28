@@ -152,9 +152,9 @@ Settings.DensityNoise = "Density"
 -- It is descending, meaning smaller integers (starting from 1) will have higher priority.
 Settings.NoiseNames = {
 	Cont = {"Continentalness",1}, -- Example naming scheme
-	Peak = {"PV",2},
+	Peak = {"PV",3},
 	Eros = {"Erosion",4},
-	Temp = {"Temperature",3},
+	Temp = {"Temperature",2},
 	Hum = {"Humidity",5}
 }
 
