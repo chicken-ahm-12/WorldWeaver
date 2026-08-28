@@ -52,7 +52,7 @@ Settings.smoothifyScale = Settings.Scale * 2 -- you can set a different scale as
 Settings.smoothificationFactor = Settings.VoxelSize - 0.001
 Settings.smoothificationSize = Settings.vector3Size + Vector3.new(Settings.smoothificationFactor,Settings.smoothificationFactor,Settings.smoothificationFactor)
 
-Settings.sharperBiomes = true -- Just means biome boundaries will look more defined even when blend is on
+Settings.sharperBiomes = false -- Just means biome boundaries will look more defined even when blend is on
 Settings.sharpnessBiomeDefactor = 1 -- Higher means less sharp boundary betweenbiomes
 
 Settings.RenderThreadCap = 1
@@ -64,7 +64,7 @@ Settings.maxDistanceFromCenter =  (Settings.Boundary - Settings.Center).Magnitud
 Settings.blendOn = true -- Whether you want to blend terrain (allows biomes to retain their unique terrain characteristics)
 Settings.fastBlend = true -- a faster way of blending. Experiment whether you like it or not
 Settings.blendThresh = 10 -- higher means more time to load, donot go past 10 or 15
-Settings.fastBlendThresh = 4 -- higher means more time to load
+Settings.fastBlendThresh = 15 -- higher means more time to load
 Settings.blendColorThresh = 4 -- self-explanatory. Works a bit differently so experiment with it.
 
 Settings.fallOff = false -- Determines whether the terrain falls off at the end
@@ -106,7 +106,7 @@ Settings.BiomeDetails = {
         Temp = NumberRange.new(0.3, 1),
         Ero  = NumberRange.new(0, 1),
         PV   = NumberRange.new(0.5, 1),
-        amp  = 3.7,
+        amp  = 2.5,
         Color = Color3.new(0.321569, 0.25098, 0.070588),
         Material = Enum.Material.Rock
     },
@@ -146,38 +146,41 @@ Settings.DensityNoise = "Density"
 
 -- Step 1: Add the Noise Name here
 
--- NOTE: here you have a nickname for the noise (on the left) and its actual name (on the right)
+-- NOTE: here you have a nickname for the noise (on the left) and its actual name and priority (on the right)
+-- FORMAT: Nickname = {Name, Priority}
+-- Priority means which noise will be most relevant in setting the base terrain (Due to how persistance works).
+-- It is descending, meaning smaller integers (starting from 1) will have higher priority.
 Settings.NoiseNames = {
-	Cont = "Continentalness", -- Example naming scheme
-	Peak = "PV",
-	Eros = "Erosion",
-	Temp = "Temperature",
-	Hum = "Humidity"
+	Cont = {"Continentalness",1}, -- Example naming scheme
+	Peak = {"PV",2},
+	Eros = {"Erosion",4},
+	Temp = {"Temperature",3},
+	Hum = {"Humidity",5}
 }
 
 -- Step 2: Reference these names in this table by their nickname and add their parameters.
 Settings.NoiseDetails = {
-	[Settings.NoiseNames.Cont] = { -- Reference cont by its nickname
+	[Settings.NoiseNames.Cont[1]] = { -- Reference cont by its nickname [1] means the first value of the table Cont (its name)
 		amp = 3, -- Add all these parameters
 		freq = 2,
 	
 	},
-	[Settings.NoiseNames.Peak] = {
+	[Settings.NoiseNames.Peak[1]] = {
 		amp = 250,
 		freq = 4,
 	
 	},
-	[Settings.NoiseNames.Eros] = {
+	[Settings.NoiseNames.Eros[1]] = {
 		amp = -Settings.VoxelSize,
 		freq = 16,
 	
 	},
-	[Settings.NoiseNames.Temp] = {
+	[Settings.NoiseNames.Temp[1]] = {
 		amp = 20,
 		freq = 8
 	},
-	[Settings.NoiseNames.Hum] = {
-		amp = 0,
+	[Settings.NoiseNames.Hum[1]] = {
+		amp = 1,
 		freq = 32
 	}
 }
@@ -191,32 +194,32 @@ Settings.NoiseDetails = {
 -- for it to have visible effect on terrain
 
 Settings.InterpolationValues = {
-    [Settings.NoiseNames.Cont] = { -- range of values with certain heights for continentalness
+    [Settings.NoiseNames.Cont[1]] = { -- range of values with certain heights for continentalness
         [0] = 0, [0.05] = 5, [0.125] = 5, [0.2] = 10,
         [0.25] = 15, [0.3] = 20, [0.375] = 20, [0.425] = 20,
         [0.5] = 5, [0.55] = 10, [0.625] = 10, [0.675] = 28,
         [0.725] = 32, [0.75] = 32, [0.85] = 46, [0.925] = 55,
         [0.975] = 68, [1] = 68
     },
-    [Settings.NoiseNames.Peak] = {
+    [Settings.NoiseNames.Peak[1]] = {
         [0] = 50, [0.05] = 68, [0.125] = 68, [0.2] = 77,
         [0.25] = 82, [0.3] = 96, [0.375] = 105, [0.425] = 105,
         [0.5] = 130, [0.65] = 130, [0.725] = 130, [0.75] = 152,
         [0.85] = 170, [0.925] = 180, [0.975] = 180, [1] = 194
     },
-    [Settings.NoiseNames.Eros] = {
+    [Settings.NoiseNames.Eros[1]] = {
         [0] = 5, [0.05] = 3, [0.125] = 3, [0.2] = 2,
         [0.25] = 2, [0.3] = 2, [0.375] = 0, [0.425] = 0,
         [0.5] = 0, [0.65] = -3, [0.725] = -8, [0.75] = -8,
         [0.85] = -16, [0.925] = -16, [0.975] = -16, [1] = -22
     },
-    [Settings.NoiseNames.Temp] = {
+    [Settings.NoiseNames.Temp[1]] = {
         [0] = 80, [0.05] = 68, [0.125] = 55, [0.2] = 55,
         [0.25] = 55, [0.3] = 37, [0.375] = 37, [0.425] = 37,
         [0.5] = 22, [0.65] = 10, [0.725] = 10, [0.75] = -5,
         [0.85] = -20, [0.925] = -20, [0.975] = -33, [1] = -33
     },
-    [Settings.NoiseNames.Hum] = {
+    [Settings.NoiseNames.Hum[1]] = {
         [0] = -31, [0.125] = -27, [0.2] = -27, [0.25] = -18,
         [0.3] = -10, [0.375] = -10, [0.425] = -12, [0.5] = -12,
         [0.65] = -12, [0.725] = 1, [0.75] = 8, [0.85] = 8,
@@ -245,8 +248,14 @@ function Settings:fallOffFunction(x)
 end
 
 
-function Settings:BuildInterpolationCache()
+function Settings:BuildCache()
     self._interpCache = {}
+    self._noiseCache = {}
+
+    for nickname, props in pairs(self.NoiseNames) do
+        table.insert(self._noiseCache, props[2], nickname)
+    end
+
     for noiseName, tbl in pairs(self.InterpolationValues) do
         local keys = {}
         for k in pairs(tbl) do table.insert(keys, k) end
