@@ -62,7 +62,7 @@ end
 
 Generator.setAttributes = function(terrainSettings, part, array, dens) 
 	for i, v in pairs(terrainSettings.NoiseNames) do
-		part:SetAttribute(v, array[v])
+		part:SetAttribute(v[1], array[v[1]])
 	end
 	part:SetAttribute("Density", dens)
 	part:SetAttribute("Biome", array.Biome)
@@ -318,6 +318,7 @@ Generator.genereateGRID_Division = function(terrainSettings, startW, endW, start
 		local heightGrid = Generator.heightGrid
 		local biomeDetails = terrainSettings.BiomeDetails
 		local noiseDetails = terrainSettings.NoiseDetails
+		local noiseCache = terrainSettings._noiseCache
 		local noiseNames = terrainSettings.NoiseNames
 		local voxelSize = terrainSettings.VoxelSize
 		
@@ -340,14 +341,15 @@ Generator.genereateGRID_Division = function(terrainSettings, startW, endW, start
 				local fallOffValue = terrainSettings:fallOffFunction(currDistInv)
 
 				local count = 1
-				for _, v in noiseNames do
-					local nc = noiseDetails[v]
+				for _, v in noiseCache do
+					local noise = noiseNames[v][1]
+					local nc = noiseDetails[noise]
 					local noise_Y = Generator.generateHeight(terrainSettings, x, z, nc.freq)
-					cell[v] = noise_Y
+					cell[noise] = noise_Y
 					totalNoise += noise_Y
 					
 					c_Y_ += noise_Y * nc.amp * (terrainSettings.Persistance^count)
-					c_Y  += (terrainSettings:GetInterpolatedAmpValue(noise_Y, v) * (terrainSettings.Persistance^count)) + c_Y_
+					c_Y  += (terrainSettings:GetInterpolatedAmpValue(noise_Y, noise) * (terrainSettings.Persistance^count)) + c_Y_
 
 					count+=1
 				end
