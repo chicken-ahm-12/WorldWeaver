@@ -12,19 +12,31 @@ local Painting = {}
 Painting.SetBiome = function(arr, terrainSettings)
 	local bestscore = math.huge
 	local bestScoreInv = math.huge
-	local currBiome 
-	for i, v in pairs(terrainSettings.Biomes) do
-		local checkCont, contPen = terrainSettings:ValueInRange(terrainSettings.BiomeDetails[v].Cont, arr.Continentalness or 0)
-		local checkTemp, tempPen = terrainSettings:ValueInRange(terrainSettings.BiomeDetails[v].Temp, arr.Temperature or 0)
-		local checkErosion, eroPen = terrainSettings:ValueInRange(terrainSettings.BiomeDetails[v].Ero, arr.Erosion or 0)
-		local checkPV, pvPen = terrainSettings:ValueInRange(terrainSettings.BiomeDetails[v].PV, arr.PV or 0)
-		local score = contPen + tempPen + eroPen+ pvPen
+	local currBiome
+	local iterationPassed = false
+	local totals =0
+	for v = 1, #terrainSettings.Biomes do
+		local biomeName = terrainSettings.Biomes[v]
+		local Biome_arr = terrainSettings.BiomeDetails[biomeName]
+		local score = 0
+		for n = 1, #terrainSettings._noiseCache do
+		local noiseNickName = terrainSettings._noiseCache[n]
+		local noiseName = terrainSettings.NoiseNames[noiseNickName][1]
+		local exist, Penalty = terrainSettings:ValueInRange(Biome_arr[noiseName], arr[noiseName] or 0)
+			if exist then
+				if not iterationPassed then
+					totals +=1
+				end
+				score += Penalty
+			end
+		end
+		iterationPassed = true
 		if score < bestscore then
 			bestscore = score
-			currBiome = v
+			currBiome = biomeName
 		end
 	end
-	bestScoreInv = (4 - bestscore)/4
+	bestScoreInv = (totals - bestscore)/totals
 	return currBiome, bestScoreInv
 end
 
