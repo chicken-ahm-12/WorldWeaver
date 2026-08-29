@@ -9,6 +9,12 @@
     "Workspace": {
       "$path": "src/Workspace"
     },
+
+    "ReplicatedStorage": {
+      "$path": "src/ReplicatedStorage"
+
+    },
+
     "DevPackages": {
       "$path": "DevPackages"
     }
