@@ -31,8 +31,8 @@ Settings.startX = -100 -- Position X where your map will start
 Settings.startZ = -100 -- Position Z where your map will start
                        -- NOTE: This is the top left Corner of your map. (StartX, StartZ)
 
-Settings.MapWidth = 500 -- Size on X-axis
-Settings.MapBreadth = 500 -- Size on Z-axis
+Settings.MapWidth = 1000 -- Size on X-axis
+Settings.MapBreadth = 1000 -- Size on Z-axis
                            -- the blocks simulate terrain by changing on Y-Axis 
 
 Settings.Center = Vector2.new( -- Center of the world
@@ -79,62 +79,6 @@ Settings.fallOffEnd   = 1.0   -- fully suppressed at this distance
 
 Settings.BedRock = -200 -- Not in use yet
 Settings.CaveFreq = 4 
-
---/////////////////////// STEPS TO ADD BIOME DATA [2 Steps] //////////////////////
-
--- Step 1: Add it's name in the Biomes table
-Settings.Biomes = {
-    "Plains", -- an example name 1
-    "Mountains", -- 2
-    "Desert", -- 3
-    "Ice", -- 4
-}
-
--- Step 2: Reference it in Details by
---         its position in Table 
---         (how Plains is 1 in this case)
---         And add these details
-
-Settings.BiomeDetails = {
-    [Settings.Biomes[1]] = { -- so for reference Settings.Biomes[1] for Plains, if you want to reference savanna, it is 5
-        Cont = NumberRange.new(0, 0.5), -- Add all these variables with their specific ranges (should be between 0-1)
-        Temp = NumberRange.new(0, 0.3),
-        Ero  = NumberRange.new(0, 1),
-        PV   = NumberRange.new(0, 0.5),
-        amp  = 1.7, -- Add the amplitude to your liking
-        Color = Color3.new(0.066667, 0.67451, 0.12549), -- Add the color of terrain blocks in that biome
-        Material = Enum.Material.Grass -- Add the material of the terrain blocks in that biome
-
-        -- NOTE: DONOT CHANGE THE NAMES OF THESE VARIABLES
-    },
-    [Settings.Biomes[2]] = { -- Mountains,
-		Cont = NumberRange.new(0, 0.5),
-        Temp = NumberRange.new(0.3, 1),
-        Ero  = NumberRange.new(0, 1),
-        PV   = NumberRange.new(0.5, 1),
-        amp  = 2.6,
-        Color = Color3.new(0.321569, 0.25098, 0.070588),
-        Material = Enum.Material.Rock
-    },
-    [Settings.Biomes[3]] = { -- Desert
-        Cont = NumberRange.new(0.5, 1),
-        Temp = NumberRange.new(0.5, 1),
-        Ero  = NumberRange.new(0, 0.5),
-        PV   = NumberRange.new(0, 0.4),
-        amp  = 1,
-        Color = Color3.new(0.866667, 0.85098, 0.121569),
-        Material = Enum.Material.Sand
-    },
-    [Settings.Biomes[4]] = { -- Ice
-        Cont = NumberRange.new(0.5, 1),
-        Temp = NumberRange.new(0, 0.3),
-        Ero  = NumberRange.new(0, 1),
-        PV   = NumberRange.new(0, 0.5),
-        amp  = 0.8,
-        Color = Color3.new(0.054902, 1, 0.905882),
-        Material = Enum.Material.Ice
-    }
-}
 
 Settings.DensityNoise = "Density"
 
@@ -233,6 +177,63 @@ Settings.InterpolationValues = {
     }
 }
 
+--/////////////////////// STEPS TO ADD BIOME DATA [2 Steps] //////////////////////
+
+-- Step 1: Add it's name in the Biomes table
+Settings.Biomes = {
+    "Plains", -- an example name 1
+    "Mountains", -- 2
+    "Desert", -- 3
+    "Ice", -- 4
+}
+
+-- Step 2: Reference it in Details by
+--         its position in Table 
+--         (how Plains is 1 in this case)
+--         And add these details
+
+Settings.BiomeDetails = {
+    [Settings.Biomes[1]] = { -- so for reference Settings.Biomes[1] for Plains, if you want to reference savanna, it is 5
+        [Settings.NoiseNames.Cont[1]] = NumberRange.new(0, 0.5), -- Add all these variables with their specific ranges (should be between 0-1)
+        [Settings.NoiseNames.Temp[1]] = NumberRange.new(0, 0.3),
+        [Settings.NoiseNames.Eros[1]]  = NumberRange.new(0, 1),
+        [Settings.NoiseNames.Peak[1]]   = NumberRange.new(0, 0.5),
+        amp  = 1.7, -- Add the amplitude to your liking
+        Color = Color3.new(0.066667, 0.67451, 0.12549), -- Add the color of terrain blocks in that biome
+        Material = Enum.Material.Grass -- Add the material of the terrain blocks in that biome
+
+        -- NOTE: DONOT CHANGE THE NAMES OF THESE VARIABLES
+    },
+    [Settings.Biomes[2]] = { -- Mountains,
+		[Settings.NoiseNames.Cont[1]] = NumberRange.new(0, 0.5),
+        [Settings.NoiseNames.Temp[1]] = NumberRange.new(0.3, 1),
+        [Settings.NoiseNames.Eros[1]]  = NumberRange.new(0, 1),
+        [Settings.NoiseNames.Peak[1]]  = NumberRange.new(0.5, 1),
+        amp  = 2.6,
+        Color = Color3.new(0.321569, 0.25098, 0.070588),
+        Material = Enum.Material.Rock
+    },
+    [Settings.Biomes[3]] = { -- Desert
+        [Settings.NoiseNames.Cont[1]] = NumberRange.new(0.5, 1),
+        [Settings.NoiseNames.Temp[1]] = NumberRange.new(0.5, 1),
+        [Settings.NoiseNames.Eros[1]]  = NumberRange.new(0, 0.5),
+        [Settings.NoiseNames.Peak[1]]   = NumberRange.new(0, 0.4),
+        amp  = 1,
+        Color = Color3.new(0.866667, 0.85098, 0.121569),
+        Material = Enum.Material.Sand
+    },
+    [Settings.Biomes[4]] = { -- Ice
+        [Settings.NoiseNames.Cont[1]] = NumberRange.new(0.5, 1),
+        [Settings.NoiseNames.Temp[1]] = NumberRange.new(0, 0.3),
+        [Settings.NoiseNames.Eros[1]]  = NumberRange.new(0, 1),
+        [Settings.NoiseNames.Peak[1]]   = NumberRange.new(0, 0.5),
+        amp  = 0.8,
+        Color = Color3.new(0.054902, 1, 0.905882),
+        Material = Enum.Material.Ice
+    }
+}
+
+
 Settings.new = function() -- dont touch
 	local self = setmetatable({}, Settings)
 	return self
@@ -252,7 +253,6 @@ function Settings:fallOffFunction(x)
     return 1 - (n * n * (3 - 2 * n))
    
 end
-
 
 function Settings:BuildCache()
     self._interpCache = {}
@@ -289,19 +289,24 @@ function Settings:GetInterpolatedAmpValue(val, noiseName)
 end
 
 function Settings:ValueInRange(Range, num) -- dont touch
-	local min = Range.Min
-	local max = Range.Max
-	local penalty
+
 	local exist = false
-	if num >= min and num <= max then
-		penalty = 0
-		exist = true
-	elseif num < min then
-		penalty = min - num
-	elseif num > max then
-		penalty = num - max
-	end
-	return exist, penalty
+    local penalty
+    if Range ~= nil then
+        local min = Range.Min
+        local max = Range.Max
+       exist = true
+        if num >= min and num <= max then
+            penalty = 0
+            
+        elseif num < min then
+            penalty = min - num
+        elseif num > max then
+            penalty = num - max
+        end
+        
+    end
+    return exist, penalty
 end
 
 function Settings:GetPartAttributes(part) 
