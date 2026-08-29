@@ -95,7 +95,7 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
   - Map dimensions (`MapWidth`, `MapBreadth`, `startX`, `startZ`)
   - `Center` and `maxDistanceFromCenter` pre-computed for falloff
   - `VoxelSize`, `ChunkSize`, `GridDIV`, `CaveDisabledMapDIV`
-  - `Seed`, `Scale`, `smoothifyScale`, `Lacunarity`, `Persistance`
+  - `Seed`, `Scale`, `smoothifyScale`, `Persistance`
   - `smoothify` — smooth vs. blocky terrain toggle
   - `useInBuiltTerrain` — `workspace.Terrain:FillBlock` vs. Parts
   - `implementBiomeScoring` — score-weighted height variation
@@ -106,7 +106,7 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
     axis `NumberRange` values per biome)
   - `NoiseNames`, `NoiseDetails`, `InterpolationValues` — full noise layer
     configuration
-  - `BuildInterpolationCache()` / `GetInterpolatedAmpValue()` — sorted linear
+  - `BuildCache()` / `GetInterpolatedAmpValue()` — sorted linear
     interpolation lookup
   - `fallOffFunction()` — smoothstep ramp between `fallOffStart` and `fallOffEnd`
   - `ValueInRange()` — penalty-distance range check used by biome scoring
