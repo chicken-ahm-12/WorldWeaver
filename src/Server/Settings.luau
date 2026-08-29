@@ -11,14 +11,20 @@ local Settings = {}
 
 Settings.__index = Settings -- Don't touch this
 
+local Replicated_Storage = game:GetService("ReplicatedStorage")
+
+Settings.Name = "Terrain_1"
+
 Settings.TerrainFolder = workspace.Debris -- you can change this to wherever you want to store the whole generated terrain
+Settings.gridLoadedEvent = Replicated_Storage:WaitForChild("Events").gridLoaded
+Settings.terrainRenderedEvent = Replicated_Storage:WaitForChild("Events").terrainRendered
 
 Settings.Scale = 500 -- Higher value means a more smooth and gradual change in terrain (and Biomes)
 Settings.Seed = 2 -- Seed, changing this will change the terrain of map too whenever you generate it.
 Settings.zero_thresh = 0.01 -- Donot touch
 Settings.ChunkSize = 16 -- Increasing this will increase Chunk Size
 
-Settings.Persistance = 0.45 -- Higher value means more ragged/spiky terrain
+Settings.Persistance = 0.6 -- Higher value means more ragged/spiky terrain
                            -- Lower value means more flat and smoother terrain
 
 Settings.startX = -100 -- Position X where your map will start
