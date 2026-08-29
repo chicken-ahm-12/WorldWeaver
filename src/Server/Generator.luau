@@ -220,7 +220,7 @@ Generator.generateDivision = function(terrainSettings, startW, endW, startB, end
 
 					local new_Height
 
-					for i  = 0, t_parts-1, 1 do
+					for i  = 0, t_parts, 1 do
 						
 						new_Height = partY + (terrainSettings.VoxelSize*(i))
 
@@ -615,6 +615,8 @@ Generator.generateTerrain = function(terrainSettings )
 	repeat task.wait(terrainSettings.breathingTime) until Generator.threadsRunning == 0
 	print("================== GRID INITIALIZED! ==================\n")
 	
+	terrainSettings.gridLoadedEvent:Fire()
+
 	mapBreadthPer = math.ceil(terrainSettings.MapBreadth / terrainSettings.CaveDisabledMapDIV)
 	mapWidthPer = math.ceil(terrainSettings.MapWidth / terrainSettings.CaveDisabledMapDIV)
 	totalDiv = mapWidthPer * mapBreadthPer
@@ -625,7 +627,7 @@ Generator.generateTerrain = function(terrainSettings )
 	if mapBreadthPer <=1 and mapWidthPer <=1 then
 		div_no+=1
 		Generator.generateDivision(terrainSettings, terrainSettings.startX, terrainSettings.MapWidth + terrainSettings.startX, terrainSettings.startZ, terrainSettings.MapBreadth + terrainSettings.startZ)
-
+		print("Running Division/Total Divisions : "..(div_no).."/"..totalDiv);
 	else
 			
 		for i = 1, mapWidthPer,1 do
@@ -655,11 +657,11 @@ Generator.generateTerrain = function(terrainSettings )
 				if Generator.threadsRunning >= terrainSettings.RenderThreadCap then
 
 					repeat
-						print("Running Division/Total Divisions : "..(div_no).."/"..totalDiv)
 						task.wait()
 					until Generator.threadsRunning == 0
 					
 					div_no+=1
+					print("Running Division/Total Divisions : "..(div_no).."/"..totalDiv)
 					Generator.generateDivision(terrainSettings, startW,endW,startB,endB)
 					
 				else
@@ -675,11 +677,13 @@ Generator.generateTerrain = function(terrainSettings )
 		end
 	end
 	
-	repeat print("Running Division/Total Divisions : "..(div_no).."/"..totalDiv); task.wait() until Generator.threadsRunning == 0
+	repeat task.wait() until Generator.threadsRunning == 0
 	
 	Generator.heightGrid = {}
 
 	print("================== TERRAIN RENDERED! ==================\n")
+	
+	terrainSettings.terrainRenderedEvent:Fire()
 	
 end
 
