@@ -58,7 +58,7 @@ Settings.smoothifyScale = Settings.Scale * 2 -- you can set a different scale as
 Settings.smoothificationFactor = Settings.VoxelSize - 0.001
 Settings.smoothificationSize = Settings.vector3Size + Vector3.new(Settings.smoothificationFactor,Settings.smoothificationFactor,Settings.smoothificationFactor)
 
-Settings.sharperBiomes = true -- Just means biome boundaries will look more defined even when blend is on
+Settings.sharperBiomes = false -- Just means biome boundaries will look more defined even when blend is on
 Settings.sharpnessBiomeDefactor = 1 -- Higher means less sharp boundary betweenbiomes
 
 Settings.RenderThreadCap = 1
@@ -112,7 +112,7 @@ Settings.BiomeDetails = {
         Temp = NumberRange.new(0.3, 1),
         Ero  = NumberRange.new(0, 1),
         PV   = NumberRange.new(0.5, 1),
-        amp  = 3.7,
+        amp  = 2.6,
         Color = Color3.new(0.321569, 0.25098, 0.070588),
         Material = Enum.Material.Rock
     },
