@@ -13,7 +13,7 @@ local Painting = require(script.Parent.Painting)
 ```
 
 ### Create a script
-First create a script and make variables linking to the Modules Settings and Generator:
+First write a script and make variables linking to the Modules Settings and Generator:
 
 ```lua
 local Settings = require(path_to_settings_module)
@@ -38,18 +38,31 @@ This ensures you can make different settings (such as different size, amplitudes
 to your liking or if there different maps at different places within the server,
 those maps could each have their own settings.
 
-### Generate Terrain
+## Generate Terrain
 
-```lua
-local new_Settings = Settings.new()
+#### Step 1: Find this command box
 
-new_Settings:BuildInterpolationCache()
+![](snapshots/Step1PermaGenerate.png)
 
-Generator.generateTerrain(new_Settings)
-```
+#### Step 2: Paste your generation script (Where you create the settings object, make your desired changes and input into the generator, here
+
+![](snapshots/Step2PermaGenerate.png)
+
+#### Step 3: Run
+
+![](snapshots/Step3PermaGenerate.png)
+
 voila! run the script and watch your terrain generate realtime!
 
 # Best Practices
+
+### Generate test worlds
+
+Instead of running in terminal, you could make a proper server script with proper paths and then generate a test world by playing the game. once you are satisfied with the generated map after tweaking it, you can save those settings in a script for future use and if you want to generate right away, copy those changes (or script) and generate in the terminal.
+
+### Save the settings of different kinds of maps
+
+As stated above, if you like different maps with different characteristics, biomes etc (that you added or changed), you should save them in a script so you don't have to keep thinking what to change to achieve the same map that you did in the past.
 
 ### Size on all axis are better off equal
 
