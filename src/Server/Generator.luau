@@ -378,7 +378,7 @@ Generator.genereateGRID_Division = function(terrainSettings, startW, endW, start
 					c_Y_*= fallOffValue
 				end
 
-				if terrainSettings.smoothify then
+				if not terrainSettings.smoothify then
 					c_Y_ = math.floor(c_Y / terrainSettings.VoxelSize) * terrainSettings.VoxelSize
 					c_Y_ -= c_Y_%terrainSettings.VoxelSize
 				end
