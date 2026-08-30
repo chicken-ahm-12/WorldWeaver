@@ -1,11 +1,11 @@
-# WorldWeaver Changelog - Version 0.10.0
+# WorldWeaver Changelog - Version 0.10.1
 
 All notable changes to WorldWeaver are documented here.  
 Format follows [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ---
 
-## [0.10.0] - 2026-08-29
+## [0.10.1] - 2026-08-29
 
 ### Major Features
 
@@ -91,7 +91,7 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 ### Breaking Changes
 - **`NoiseNames` format changed** — values are `{ActualName, Priority}` tables instead of strings
 - **`BuildInterpolationCache()` removed** — use `settings:BuildCache()` instead
-- **`smoothify` branch removed** — single `VoxelSize`-stepped fill for all modes
+- **`smoothify` branch added back for if `blendOn = false`** — even if a blend doesn't occur, the snapping will happen if smoothify is off
 - **Default values changed**:
   - `smoothificationFactor` = `VoxelSize - 0.001`
   - `implementBiomeScoring` = `false`
