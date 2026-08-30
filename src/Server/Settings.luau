@@ -31,8 +31,8 @@ Settings.startX = -100 -- Position X where your map will start
 Settings.startZ = -100 -- Position Z where your map will start
                        -- NOTE: This is the top left Corner of your map. (StartX, StartZ)
 
-Settings.MapWidth = 1000 -- Size on X-axis
-Settings.MapBreadth = 1000 -- Size on Z-axis
+Settings.MapWidth = 500 -- Size on X-axis
+Settings.MapBreadth = 500 -- Size on Z-axis
                            -- the blocks simulate terrain by changing on Y-Axis 
 
 Settings.Center = Vector2.new( -- Center of the world
