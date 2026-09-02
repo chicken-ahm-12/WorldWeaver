@@ -31,7 +31,7 @@ local new_Settings = Settings.new()
 -- should be made here
 
 -- ///////
-new_Settings:BuildInterpolationCache() -- this is necessary for proper smooth terrain
+new_Settings:BuildCache() -- this is necessary for proper smooth terrain
 ```
 
 This ensures you can make different settings (such as different size, amplitudes, etc)
