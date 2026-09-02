@@ -1,0 +1,269 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>WorldWeaver: Procedural Terrain for Roblox</title>
+  <meta name="description" content="Documentation for WorldWeaver, a procedural Roblox terrain generator with biome-aware noise, blending and smooth terrain support.">
+  <link rel="preload" as="image" href="assets/main_snap.png">
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <div class="ambient"></div>
+  <header class="topbar">
+    <a class="brand" href="#home" aria-label="WorldWeaver home"><span class="brand-mark">WorldWeaver</span></a>
+    <div class="top-actions">
+      <button class="search-button" id="searchButton" type="button"><span>⌕</span><span>Search docs</span><kbd>Ctrl K</kbd></button>
+      <a href="https://github.com/argon-rbx/argon" target="_blank" rel="noreferrer">Argon ↗</a>
+    </div>
+  </header>
+
+  <div class="layout">
+    <aside class="sidebar">
+      <div class="side-label">DOCUMENTATION</div>
+      <nav id="nav">
+        <a href="#home" class="active"><span>⌂</span> Overview</a>
+        <a href="#getting-started"><span>01</span> Getting started</a>
+        <a href="#argon"><span>02</span> Argon setup</a>
+        <a href="#settings"><span>03</span> Settings reference</a>
+        <a href="#noise"><span>04</span> Noise & interpolation</a>
+        <a href="#biomes"><span>05</span> Biomes</a>
+        <a href="#performance"><span>06</span> Performance</a>
+        <a href="#api"><span>07</span> API surface</a>
+        <a href="#snapshots"><span>08</span> Visual snapshots</a>
+      </nav>
+      <div class="side-note">
+        <div class="dot"></div>
+        <div><strong>Install. Configure. Generate.</strong><p>Everything you need to install, configure, and generate procedural Roblox terrain.</p></div>
+      </div>
+    </aside>
+
+    <main>
+      <section id="home" class="hero section-anchor">
+        <div class="hero-copy">
+          <div class="eyebrow"><span class="eyebrow-dot"></span> ROBLOX · LUAU · TERRAIN</div>
+          <h1>Shape worlds,<br><em>one voxel at a time.</em></h1>
+          <p class="lede">WorldWeaver is a procedural terrain generator built around layered noise, biome selection, interpolation, blending and optional Roblox Terrain rendering.</p>
+          <div class="hero-actions">
+            <a class="button primary" href="#getting-started">Get started <span>→</span></a>
+            <a class="button ghost" href="#settings">Browse settings</a>
+          </div>
+          <div class="hero-meta"><span>Core modules</span><b>Settings + Generator + Painting</b><span>·</span><span>Recommended start</span><b>500 × 500</b></div>
+        </div>
+        <div class="hero-art"><img src="assets/main_snap.png" alt="Blocky WorldWeaver terrain rendered with Roblox Terrain"></div>
+        
+      </section>
+
+      <section class="feature-grid section-anchor">
+        <article><span class="feature-icon">∿</span><div><h3>Layered noise</h3><p>Continentalness, peaks, erosion, temperature and humidity feed terrain height and biome classification.</p></div></article>
+        <article><span class="feature-icon">◈</span><div><h3>Biome-aware</h3><p>Each biome defines ranges over the configured noises, plus its own amplitude, color and material.</p></div></article>
+        <article><span class="feature-icon">≈</span><div><h3>Two render paths</h3><p>Use anchored Parts for block-style terrain or Roblox's built-in Terrain for large maps.</p></div></article>
+      </section>
+
+      <section id="getting-started" class="content-section section-anchor">
+        <div class="section-kicker1">01 / GETTING STARTED</div>
+        <p class="section-intro">Keep the three WorldWeaver modules together, create a settings instance, build its cache, then hand it to the generator.</p>
+        <div class="steps">
+          <article class="step"><div class="step-num">01</div><div><h3>Place the modules</h3><p>For a simple Argon project, keep the modules under <code>src/ServerScriptService/WorldWeaver/</code>. The Generator already expects Painting beside it.</p><pre><code>src/
+└── ServerScriptService/
+    └── WorldWeaver/
+        ├── Generator.luau
+        ├── Painting.luau
+        └── Settings.luau</code></pre></div></article>
+          <article class="step"><div class="step-num">02</div><div><h3>Create the required events</h3><p><code>Settings.luau</code> waits for <code>ReplicatedStorage.Events.gridLoaded</code> and <code>terrainRendered</code>. Both are fired as BindableEvents by the generator.</p><pre><code>ReplicatedStorage/
+└── Events/
+    ├── gridLoaded
+    └── terrainRendered</code></pre></div></article>
+          <article class="step"><div class="step-num">03</div><div><h3>Generate from a server script</h3><p>Require the modules, create a settings object, change the values you want, build the cache, then call <code>Generator.generateTerrain(settings)</code>.</p><pre><code>local WorldWeaver = script.Parent.WorldWeaver
+local Settings = require(WorldWeaver.Settings)
+local Generator = require(WorldWeaver.Generator)
+
+local settings = Settings.new()
+settings.Seed = 42
+settings.MapWidth = 500
+settings.MapBreadth = 500
+settings:BuildCache()
+
+Generator.generateTerrain(settings)</code></pre></div></article>
+        </div>
+        <div class="callout tip"><strong>Recommended workflow</strong><span>Develop with a normal server script and Play Test first. Once a map is stable, keep its settings in a dedicated preset script so the same world can be reproduced later.</span></div>
+      </section>
+
+      <section id="argon" class="content-section section-anchor alt">
+        <div class="section-kicker1">02 / ARGON SETUP</div>
+        <p class="section-intro">Argon supports two-way syncing and building Roblox projects. The layout below deliberately maps your source tree to Roblox services while keeping WorldWeaver self-contained.</p>
+        <div class="two-col">
+          <div>
+            <h3>Project tree</h3>
+            <pre><code>WorldWeaverGame/
+├── default.project.json
+├── src/
+│   ├── ServerScriptService/
+│   │   ├── WorldWeaver/
+│   │   │   ├── Generator.luau
+│   │   │   ├── Painting.luau
+│   │   │   └── Settings.luau
+│   │   └── Main.server.luau
+│   └── ReplicatedStorage/
+│       └── Events/
+│           ├── gridLoaded
+│           └── terrainRendered
+└── README.md</code></pre>
+          </div>
+          <div>
+            <h3><code>default.project.json</code></h3>
+            <pre><code>{
+  "name": "WorldWeaverGame",
+  "tree": {
+    "$className": "DataModel",
+    "ServerScriptService": {
+      "$path": "src/ServerScriptService"
+    },
+    "ReplicatedStorage": {
+      "$path": "src/ReplicatedStorage"
+    }
+  }
+}</code></pre>
+            <p class="small">This keeps the requested <code>src/ServerScriptService</code> structure while explicitly mapping it to the Roblox service.</p>
+          </div>
+        </div>
+        <div class="command-grid">
+          <div class="command"><span>01</span><div><b>Install Argon</b><p>Install the Argon CLI and Roblox Studio plugin from the official project.</p><a href="https://argon.wiki" target="_blank" rel="noreferrer">argon.wiki ↗</a></div></div>
+          <div class="command"><span>02</span><div><b>Open the project</b><p>Open the folder in your editor and start Argon's sync workflow for the project.</p><code>argon studio</code></div></div>
+          <div class="command"><span>03</span><div><b>Build a place artifact</b><p>When you want a generated Roblox project artifact rather than a live sync session, use Argon's build command.</p><code>argon build</code></div></div>
+        </div>
+        <div class="callout info"><strong>What is Argon?</strong><span>It's a feature-full tool that allows use of external editors, version control systems, automated workflows and helps manage both small and huge projects (especially for roblox). It's made for professional users as well as for beginners.</span></div>
+      </section>
+
+      <section id="settings" class="content-section section-anchor">
+        <div class="section-kicker1">03 / SETTINGS REFERENCE</div>
+        <p class="section-intro">These are the settings you will normally use to shape terrain, control rendering, tune blending, configure noise, define biomes, and manage generation performance.</p>
+        <div class="filter-row"><input id="settingSearch" type="search" placeholder="Filter settings…" autocomplete="off"><div class="chips" id="chips"><button class="chip active" data-group="all">All</button><button class="chip" data-group="core">Core</button><button class="chip" data-group="render">Rendering</button><button class="chip" data-group="blend">Blending</button><button class="chip" data-group="noise">Noise</button><button class="chip" data-group="biome">Biomes</button><button class="chip" data-group="perf">Performance</button></div></div>
+        <div class="settings-table" id="settingsTable">
+          <div class="setting-row head"><span>Setting</span><span>Purpose</span><span>Best practice</span><span>Default</span></div>
+          <div class="setting-row" data-group="core"><code>Name</code><span>Name for the settings preset.</span><span>Give presets clear names when you keep multiple world configurations.</span><em>Terrain_1</em></div>
+          <div class="setting-row" data-group="core"><code>TerrainFolder</code><span>Parent for generated chunk Models when Parts are used.</span><span>Point it at a dedicated workspace folder such as <code>workspace.Debris</code>; keep generated content isolated.</span><em>workspace.Debris</em></div>
+          <div class="setting-row" data-group="core"><code>gridLoadedEvent</code><span>BindableEvent fired after the height/biome grid is initialized.</span><span>Create <code>ReplicatedStorage.Events.gridLoaded</code> before generation starts.</span><em>Events.gridLoaded</em></div>
+          <div class="setting-row" data-group="core"><code>terrainRenderedEvent</code><span>BindableEvent fired after rendering completes.</span><span>Use it to trigger post-generation setup rather than guessing how long generation will take.</span><em>Events.terrainRendered</em></div>
+          <div class="setting-row" data-group="core"><code>Scale</code><span>Base spatial scale fed into Roblox noise. Larger values make terrain change more gradually.</span><span>Increase for broad landforms; decrease for more frequent variation. Tune alongside each noise frequency.</span><em>500</em></div>
+          <div class="setting-row" data-group="core"><code>Seed</code><span>Third noise coordinate that changes the generated world pattern.</span><span>Keep a fixed seed for production maps; change it when exploring variants.</span><em>2</em></div>
+          <div class="setting-row" data-group="core"><code>Persistance</code><span>Weight applied to successive noise layers. Higher values preserve more higher-frequency influence.</span><span>Start around <code>0.6</code>; lower values produce calmer terrain, higher values can become rugged.</span><em>0.6</em></div>
+          <div class="setting-row" data-group="core"><code>startX</code><span>World-space X origin of the generated map.</span><span>Set it once per map preset and keep it aligned with <code>startZ</code> and your intended center.</span><em>-100</em></div>
+          <div class="setting-row" data-group="core"><code>startZ</code><span>World-space Z origin of the generated map.</span><span>Keep the map origin predictable so saved presets reproduce the same placement.</span><em>-100</em></div>
+          <div class="setting-row" data-group="core"><code>MapWidth</code><span>Generated extent along X.</span><span>Make it equal to MapBreadth when possible and align it with the division size.</span><em>500</em></div>
+          <div class="setting-row" data-group="core"><code>MapBreadth</code><span>Generated extent along Z.</span><span>Match MapWidth for the simplest, most predictable grid layout.</span><em>500</em></div>
+          <div class="setting-row" data-group="render"><code>VoxelSize</code><span>Size of each generated Part or the base size used by Roblox Terrain fills.</span><span>Keep it at 4 unless you deliberately want coarser terrain.</span><em>4</em></div>
+          <div class="setting-row" data-group="render"><code>useInBuiltTerrain</code><span>Switches rendering from anchored Parts to <code>workspace.Terrain</code>.</span><span>Prefer <code>true</code> for very large maps; use Parts when you want the block-based representation.</span><em>false</em></div>
+          <div class="setting-row" data-group="render"><code>smoothify</code><span>Chooses smooth terrain calculations instead of voxel-snapped block heights.</span><span>Use <code>true</code> when you want smoother landforms; compare the visual result against fastBlend.</span><em>false</em></div>
+          <div class="setting-row" data-group="render"><code>smoothifyScale</code><span>Alternate noise scale used when smoothify is enabled.</span><span>Leave at the derived default unless smooth terrain needs a different spatial character.</span><em>Scale × 2</em></div>
+          <div class="setting-row" data-group="render"><code>smoothificationSize</code><span>Derived fill size used for Roblox Terrain when smooth rendering is enabled.</span><span>Do not edit directly; it is calculated from VoxelSize.</span><em>derived</em></div>
+          <div class="setting-row" data-group="blend"><code>blendOn</code><span>Blends biome amplitudes so neighboring biomes influence terrain shape.</span><span>Keep enabled for biome transitions; disable only when you specifically want hard, independent biome heights.</span><em>true</em></div>
+          <div class="setting-row" data-group="blend"><code>fastBlend</code><span>Selects the cheaper two-stage blending path.</span><span>Good default for large maps; normal blending can create broader neighborhood influence.</span><em>true</em></div>
+          <div class="setting-row" data-group="blend"><code>blendThresh</code><span>Neighborhood radius used by normal blending.</span><span>Keep modest; the source recommends not going beyond roughly 10–15.</span><em>10</em></div>
+          <div class="setting-row" data-group="blend"><code>fastBlendThresh</code><span>Neighborhood radius used by fast blending.</span><span>Increase carefully because larger radii cost more work.</span><em>4</em></div>
+          <div class="setting-row" data-group="blend"><code>blendColorThresh</code><span>Distance between samples used to average biome colors at render time.</span><span>Keep small and test visually; it affects color transitions, not height blending.</span><em>4</em></div>
+          <div class="setting-row" data-group="core"><code>fallOff</code><span>Multiplies terrain height toward the edge of the map using the falloff function.</span><span>Useful for island-like maps. Keep the default disabled until the terrain shape is otherwise stable.</span><em>false</em></div>
+          <div class="setting-row" data-group="core"><code>fallOffStart</code><span>Normalized distance from center at which falloff begins.</span><span>Values are intended in the 0–1 range; <code>0.35</code> leaves the inner area unchanged.</span><em>0.35</em></div>
+          <div class="setting-row" data-group="core"><code>fallOffEnd</code><span>Normalized distance where falloff reaches zero.</span><span>Keep at or above fallOffStart; <code>1.0</code> fades the map fully at its outer boundary.</span><em>1.0</em></div>
+          <div class="setting-row" data-group="perf"><code>GridDIV</code><span>Width/breadth of each grid-generation division.</span><span>Align it with map dimensions when practical; it controls how the height grid is partitioned.</span><em>600</em></div>
+          <div class="setting-row" data-group="perf"><code>GridCAP</code><span>Maximum number of grid divisions allowed to run concurrently.</span><span>Start low. Raise only after profiling server generation time and memory.</span><em>2</em></div>
+          <div class="setting-row" data-group="perf"><code>CaveDisabledMapDIV</code><span>Division size used while rendering terrain blocks/fills.</span><span>Make MapWidth and MapBreadth multiples of it, or keep both dimensions below it, to avoid awkward partial divisions.</span><em>500</em></div>
+          <div class="setting-row" data-group="perf"><code>RenderThreadCap</code><span>Maximum number of render divisions allowed concurrently.</span><span>Keep conservative; rendering is the expensive phase, especially with Parts.</span><em>1</em></div>
+          <div class="setting-row" data-group="noise"><code>CaveFreq</code><span>Frequency multiplier for the 3D density noise used during terrain generation.</span><span>Increase for more rapid density variation; change only after understanding the visual impact.</span><em>4</em></div>
+          <div class="setting-row" data-group="noise"><code>NoiseNames</code><span>Maps short nicknames to noise names and priorities.</span><span>Keep the existing default noises unless you know the downstream tables and biome definitions will be updated together.</span><em>5 entries</em></div>
+          <div class="setting-row" data-group="noise"><code>NoiseDetails</code><span>Defines amplitude and frequency for each configured noise.</span><span>When adding a noise, also add interpolation values and, if relevant, biome ranges.</span><em>5 entries</em></div>
+          <div class="setting-row" data-group="noise"><code>InterpolationValues</code><span>Maps normalized noise values to terrain-height contributions using linear interpolation.</span><span>Keep keys ordered conceptually from 0 to 1 and cover the range; use it as the main tool for shaping landforms.</span><em>5 curves</em></div>
+          <div class="setting-row" data-group="biome"><code>Biomes</code><span>Ordered list of biome names considered by biome scoring.</span><span>Every name needs a matching entry in BiomeDetails.</span><em>4 entries</em></div>
+          <div class="setting-row" data-group="biome"><code>BiomeDetails</code><span>Defines noise ranges, amplitude, color and material for each biome.</span><span>Keep range definitions coherent and always provide <code>amp</code>, <code>Color</code> and <code>Material</code>.</span><em>4 entries</em></div>
+          <div class="setting-row" data-group="biome"><code>implementBiomeScoring</code><span>Multiplies terrain contribution by the biome match score.</span><span>Treat as an experimental visual control; compare against the simpler default.</span><em>false</em></div>
+          <div class="setting-row" data-group="biome"><code>sharpnessBiomeDefactor</code><span>Controls how strongly biome amplitude is reduced when sharper biome boundaries are enabled.</span><span>Keep it near <code>1</code>. Increase it for a softer transition in terrain height between biome regions.</span><em>1</em></div>
+        </div>
+        <div class="callout info"><strong>Keep implementation values stable</strong><span>Some values in <code>Settings.luau</code> are calculated from other settings or are used internally by the generator. Unless you are extending WorldWeaver itself, leave those values at their defaults.</span></div>
+      </section>
+
+      <section id="noise" class="content-section section-anchor alt">
+        <div class="section-kicker1">04 / NOISE & INTERPOLATION</div>
+        <p class="section-intro">WorldWeaver builds terrain from five named noise signals, each with a frequency, amplitude, and interpolation curve that maps noise to height. The Name and Priority parameters manage these signals, higher priority values reduce a signal's influence. The contribution decay across successive layers is controlled by <code>Settings.Persistance</code>.</p>
+        <div class="noise-cards">
+          <article><b>Cont</b><strong>Continentalness</strong><span>Priority 1 · amp 4 · freq 2</span><p>Low-frequency landmass structure.</p></article>
+          <article><b>Eros</b><strong>Erosion</strong><span>Priority 2 · amp −VoxelSize · freq 16</span><p>Higher-frequency height reduction/detail.</p></article>
+          <article><b>Hum</b><strong>Humidity</strong><span>Priority 3 · amp 1 · freq 32</span><p>Fine-scale signal used heavily for biome identity.</p></article>
+          <article><b>Peak</b><strong>PV</strong><span>Priority 4 · amp 250 · freq 4</span><p>Major elevation driver in the default terrain curve.</p></article>
+          <article><b>Temp</b><strong>Temperature</strong><span>Priority 5 · amp 20 · freq 8</span><p>Biome signal with a moderate terrain contribution.</p></article>
+        </div>
+        <div class="two-col code-cols">
+          <div><h3>Adding a noise</h3><pre><code>Settings.NoiseNames.Moist = {"Moisture", 6}
+
+Settings.NoiseDetails[Settings.NoiseNames.Moist[1]] = {
+    amp = 8,
+    freq = 12,
+}
+
+Settings.InterpolationValues[Settings.NoiseNames.Moist[1]] = {
+    [0] = -4,
+    [0.5] = 0,
+    [1] = 8,
+}</code></pre></div>
+          <div><h3>Why the cache matters</h3><p><code>BuildCache()</code> sorts interpolation keys and prepares the ordered noise list used by the generator. Call it after editing noise/interpolation configuration and before generating.</p><div class="mini-diagram"><span>Noise</span><i>→</i><span>Interpolation</span><i>→</i><span>Height</span><i>→</i><span>Biome</span></div></div>
+        </div>
+      </section>
+
+      <section id="biomes" class="content-section section-anchor">
+        <div class="section-kicker1">05 / BIOMES</div>
+      
+        <p class="section-intro">Painting.SetBiome checks each configured biome against the current noise values, calculates a penalty for values outside each range, and chooses the biome with the lowest total penalty.</p>
+        <div class="biome-grid">
+          <article><div class="swatch plains"></div><h3>Plains</h3><p>Continentalness 0–0.5, Temperature 0–0.3, Erosion 0–1, PV 0–0.5. Amplitude 1.7.</p><span>Grass</span></article>
+          <article><div class="swatch mountains"></div><h3>Mountains</h3><p>Continentalness 0–0.5, Temperature 0.3–1, Erosion 0–1, PV 0.5–1. Amplitude 2.6.</p><span>Rock</span></article>
+          <article><div class="swatch desert"></div><h3>Desert</h3><p>Continentalness 0.5–1, Temperature 0.5–1, Erosion 0–0.5, PV 0–0.4. Amplitude 1.</p><span>Sand</span></article>
+          <article><div class="swatch ice"></div><h3>Ice</h3><p>Continentalness 0.5–1, Temperature 0–0.3, Erosion 0–1, PV 0–0.5. Amplitude 0.8.</p><span>Ice</span></article>
+        </div>
+        <div class="callout tip"><strong>Best practice</strong><span>When adding a biome, update both <code>Biomes</code> and <code>BiomeDetails</code>. Keep the noise keys in BiomeDetails aligned with your NoiseNames table. The biome's <code>amp</code>, <code>Color</code> and <code>Material</code> are part of rendering and height shaping, not decoration alone.</span></div>
+      </section>
+
+      <section id="performance" class="content-section section-anchor alt">
+        <div class="section-kicker1">06 / PERFORMANCE</div>
+        <div class="perf-list">
+          <article><span>01</span><div><h3>Prototype small</h3><p>Start around 300–500 studs per axis while tuning. Maps around 600×600 or 800×800 are already substantial.</p></div></article>
+          <article><span>02</span><div><h3>Align divisions</h3><p>Keep MapWidth and MapBreadth equal where practical, and make them multiples of the rendering division or smaller than it.</p></div></article>
+          <article><span>03</span><div><h3>Use built-in Terrain for very large worlds</h3><p>It is recommended to have <code>useInBuiltTerrain = true</code> for maps around 2000×2000 studs or more, with <code>fastBlend = true</code> as a strong companion.</p></div></article>
+          <article><span>04</span><div><h3>Control concurrency</h3><p><code>GridCAP</code> controls grid work while <code>RenderThreadCap</code> controls rendering work. Increasing both can raise throughput but also increases pressure on the server.</p></div></article>
+          <article><span>05</span><div><h3>Generate test worlds</h3><p>Keep a test server script with saved presets. This makes iteration faster than repeatedly rebuilding a final map before the shape is stable.</p></div></article>
+        </div>
+      </section>
+
+      <section id="api" class="content-section section-anchor">
+        <div class="section-kicker1">07 / API SURFACE</div>
+        <div class="api-grid">
+          <article><code>Settings.new()</code><p>Creates an independent settings object using the Settings table as its metatable.</p></article>
+          <article><code>Settings:BuildCache()</code><p>Builds the ordered noise and interpolation caches required by generation.</p></article>
+          <article><code>Generator.generateTerrain(settings)</code><p>Runs the grid phase, waits for it to complete, renders divisions, clears the height grid and fires the completion event.</p></article>
+          <article><code>Painting.SetBiome(arr, settings)</code><p>Selects the best matching biome and returns the biome name plus its normalized inverse score.</p></article>
+          <article><code>Settings:GetInterpolatedAmpValue(value, name)</code><p>Linearly interpolates a configured noise curve.</p></article>
+          <article><code>Settings:ValueInRange(range, num)</code><p>Checks a value against a NumberRange and returns whether the range exists plus its distance penalty.</p></article>
+        </div>
+        <div class="callout tip"><strong>Cache after configuration</strong><span>Call <code>BuildCache()</code> after changing interpolation or noise configuration and before generating terrain.</span></div>
+      </section>
+
+      <section id="snapshots" class="content-section section-anchor alt">
+        <div class="section-kicker1">08 / VISUAL SNAPSHOTS</div>
+        <p class="section-intro">Use these combinations to compare blocky and smooth terrain, with either Parts or Roblox's built-in Terrain renderer.</p>
+        <div class="snapshot-grid">
+          <figure class="large"><img src="assets/main_snap.png" alt="Smoothify false and built-in Terrain disabled"><figcaption><b>Blocky + Parts</b></figcaption></figure>
+          <figure class="large"><img src="assets/smooth_block.png" alt="Smoothify false and built-in Terrain disabled"><figcaption><b>Smooth + Parts</b></figcaption></figure>
+          <figure class="large"><img src="assets/snap_2.png" alt="Smoothify true and built-in Terrain enabled"><figcaption><b>Blocky + In-Built-Terrain</b></figcaption></figure>
+          <figure class="large"><img src="assets/smooth.png" alt="Smoothify false and built-in Terrain enabled"><figcaption><b>Smooth + In-Built-Terrain</b></figcaption></figure>
+          
+        </div>
+      </section>
+
+      <footer><div><strong>WorldWeaver</strong><span>Procedural terrain for Roblox</span></div><div>Built for Luau projects using Argon.</div></footer>
+    </main>
+  </div>
+
+  <div class="search-modal" id="searchModal" aria-hidden="true">
+    <div class="search-panel"><div class="search-head"><input id="globalSearch" placeholder="Search settings, biomes, Argon…" autofocus><button id="closeSearch" type="button">Esc</button></div><div id="searchResults"></div></div>
+  </div>
+  <script src="app.js"></script>
+</body>
+</html>
