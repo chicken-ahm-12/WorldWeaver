@@ -15,7 +15,7 @@
 
 # Misc
 .DS_Store
-.website
+/website
 
 # EXTRAS
 Deletes.txt
