@@ -1,6 +1,6 @@
 [package]
 name = "WorldWeaver"
-description = "A powerful terrain generation tool that helps you generate procedural terrain to your liking, similar to minecraft"
+description = "A powerful terrain generation tool for roblox that helps you generate procedural terrain to your liking, similar to minecraft"
 version = "0.1.0"
 license = "Apache-2.0"
 authors = ["chickenMarinator"]
